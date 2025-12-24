@@ -324,9 +324,11 @@ const CardDisplay = ({
 
   const baseClasses =
     "relative rounded-xl border-2 shadow-lg transition-all flex flex-col items-center justify-between cursor-pointer active:scale-95 select-none";
+
+  // Adjusted sizes for mobile to prevent overlaps
   const sizeClasses = small
-    ? "w-16 h-24 p-1"
-    : "w-24 h-36 md:w-28 md:h-44 lg:w-32 lg:h-48 p-2 md:p-3";
+    ? "w-14 h-20 md:w-16 md:h-24 p-1" // Reduced small size slightly
+    : "w-20 h-28 sm:w-24 sm:h-36 md:w-28 md:h-44 lg:w-32 lg:h-48 p-2 md:p-3"; // Reduced default size on mobile
 
   return (
     <div
@@ -351,14 +353,14 @@ const CardDisplay = ({
         )}
       </div>
 
-      <card.icon className={`${card.color}`} size={small ? 20 : 36} />
+      <card.icon className={`${card.color}`} size={small ? 16 : 28} />
 
       <div className="w-full text-center">
-        <div className="font-bold text-white text-[9px] md:text-xs lg:text-sm leading-tight mb-1 truncate px-1">
+        <div className="font-bold text-white text-[8px] sm:text-[9px] md:text-xs lg:text-sm leading-tight mb-1 truncate px-1">
           {card.name}
         </div>
         {!small && (
-          <div className="text-[8px] md:text-[9px] text-white/60 leading-tight bg-black/40 p-1 rounded h-8 flex items-center justify-center">
+          <div className="text-[7px] sm:text-[8px] md:text-[9px] text-white/60 leading-tight bg-black/40 p-1 rounded h-8 flex items-center justify-center overflow-hidden">
             {card.desc}
           </div>
         )}
@@ -368,16 +370,16 @@ const CardDisplay = ({
 };
 
 const HowToPlayModal = ({ onClose }) => (
-  <div className="fixed inset-0 z-[200] bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300 overflow-y-auto">
-    <div className="bg-slate-900 border border-slate-700 w-full max-w-4xl rounded-3xl shadow-2xl p-6 md:p-10 relative my-8">
+  <div className="fixed inset-0 z-[200] bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
+    <div className="bg-slate-900 border border-slate-700 w-full max-w-4xl rounded-3xl shadow-2xl p-6 md:p-10 relative my-8 max-h-[90vh] flex flex-col">
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 p-2 bg-slate-800 rounded-full hover:bg-red-500/20 hover:text-red-400 transition-colors"
+        className="absolute top-4 right-4 p-2 bg-slate-800 rounded-full hover:bg-red-500/20 hover:text-red-400 transition-colors z-10"
       >
         <X size={24} />
       </button>
 
-      <div className="text-center mb-8">
+      <div className="text-center mb-6 shrink-0">
         <h2 className="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 tracking-widest uppercase mb-2">
           How To Play
         </h2>
@@ -386,133 +388,140 @@ const HowToPlayModal = ({ onClose }) => (
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8 mb-8">
-        {/* BASICS */}
-        <div className="space-y-6">
-          <section>
-            <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-              <Anchor className="text-cyan-500" size={20} /> The Goal
-            </h3>
-            <p className="text-slate-300 text-sm leading-relaxed">
-              Win rounds to gain points. The first player to reach{" "}
-              <strong>{WIN_THRESHOLD} points</strong> wins the game. A round
-              ends when a player decides to <strong>STOP</strong> or call{" "}
-              <strong>LAST CHANCE</strong>.
-            </p>
-          </section>
+      <div className="overflow-y-auto pr-2 custom-scrollbar flex-1">
+        <div className="grid md:grid-cols-2 gap-8 mb-8">
+          {/* BASICS */}
+          <div className="space-y-6">
+            <section>
+              <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                <Anchor className="text-cyan-500" size={20} /> The Goal
+              </h3>
+              <p className="text-slate-300 text-sm leading-relaxed">
+                Win rounds to gain points. The first player to reach{" "}
+                <strong>{WIN_THRESHOLD} points</strong> wins the game. A round
+                ends when a player decides to <strong>STOP</strong> or call{" "}
+                <strong>LAST CHANCE</strong>.
+              </p>
+            </section>
 
-          <section>
-            <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-              <RotateCcw className="text-emerald-500" size={20} /> Your Turn
-            </h3>
-            <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700 space-y-3">
-              <div className="flex gap-3">
-                <div className="bg-slate-700 w-6 h-6 rounded flex items-center justify-center font-bold text-xs">
-                  1
+            <section>
+              <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                <RotateCcw className="text-emerald-500" size={20} /> Your Turn
+              </h3>
+              <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700 space-y-3">
+                <div className="flex gap-3">
+                  <div className="bg-slate-700 w-6 h-6 rounded flex items-center justify-center font-bold text-xs shrink-0">
+                    1
+                  </div>
+                  <div className="text-sm text-slate-300">
+                    <strong>Draw:</strong> Choose one:
+                    <ul className="list-disc ml-4 mt-1 text-slate-400">
+                      <li>
+                        Draw <strong>2 cards</strong> from Deck, keep{" "}
+                        <strong>1</strong>.
+                      </li>
+                      <li>
+                        Take <strong>1 card</strong> from Discard.
+                      </li>
+                    </ul>
+                  </div>
                 </div>
-                <div className="text-sm text-slate-300">
-                  <strong>Draw:</strong> Choose one:
-                  <ul className="list-disc ml-4 mt-1 text-slate-400">
+                <div className="flex gap-3">
+                  <div className="bg-slate-700 w-6 h-6 rounded flex items-center justify-center font-bold text-xs shrink-0">
+                    2
+                  </div>
+                  <div className="text-sm text-slate-300">
+                    <strong>Play Pairs (Optional):</strong> If you have a
+                    matching pair of Duo cards, play them to trigger their
+                    effect and score points.
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="bg-slate-700 w-6 h-6 rounded flex items-center justify-center font-bold text-xs shrink-0">
+                    3
+                  </div>
+                  <div className="text-sm text-slate-300">
+                    <strong>End Round?</strong> If you have{" "}
+                    <strong>{STOP_THRESHOLD}+ points</strong>, you can choose to
+                    end the round. Otherwise, end your turn.
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          {/* CARDS & SCORING */}
+          <div className="space-y-6">
+            <section>
+              <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                <Sparkles className="text-purple-500" size={20} /> Card Effects
+              </h3>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="bg-red-900/20 border border-red-900/50 p-2 rounded">
+                  <strong className="text-red-400 block mb-1">
+                    CRAB (Duo)
+                  </strong>
+                  Look through Discard & pick 1.
+                </div>
+                <div className="bg-blue-900/20 border border-blue-900/50 p-2 rounded">
+                  <strong className="text-blue-400 block mb-1">
+                    BOAT (Duo)
+                  </strong>
+                  Take another turn immediately.
+                </div>
+                <div className="bg-emerald-900/20 border border-emerald-900/50 p-2 rounded">
+                  <strong className="text-emerald-400 block mb-1">
+                    FISH (Duo)
+                  </strong>
+                  Draw the top card of the deck.
+                </div>
+                <div className="bg-slate-800 border border-slate-600 p-2 rounded">
+                  <strong className="text-slate-400 block mb-1">
+                    SHARK (Duo)
+                  </strong>
+                  Steal a card from an opponent.
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                <Trophy className="text-yellow-500" size={20} /> Ending the
+                Round
+              </h3>
+              <div className="space-y-2">
+                <div className="bg-slate-800 p-3 rounded-lg border-l-4 border-slate-400">
+                  <strong className="text-white block">STOP (Safe)</strong>
+                  <span className="text-slate-400 text-xs">
+                    Round ends immediately. Everyone scores their points.
+                  </span>
+                </div>
+                <div className="bg-slate-800 p-3 rounded-lg border-l-4 border-yellow-500">
+                  <strong className="text-yellow-400 block">
+                    LAST CHANCE (Bet)
+                  </strong>
+                  <span className="text-slate-400 text-xs">
+                    You bet you have the most points. Everyone else gets{" "}
+                    <strong>1 final turn</strong>.
+                  </span>
+                  <ul className="list-disc ml-4 mt-1 text-xs text-slate-500">
                     <li>
-                      Draw <strong>2 cards</strong> from Deck, keep{" "}
-                      <strong>1</strong>.
+                      <strong>Win Bet:</strong> You get Points + Bonus.
+                      Opponents get minimal points.
                     </li>
                     <li>
-                      Take <strong>1 card</strong> from Discard.
+                      <strong>Lose Bet:</strong> You get minimal points.
+                      Opponents score big.
                     </li>
                   </ul>
                 </div>
               </div>
-              <div className="flex gap-3">
-                <div className="bg-slate-700 w-6 h-6 rounded flex items-center justify-center font-bold text-xs">
-                  2
-                </div>
-                <div className="text-sm text-slate-300">
-                  <strong>Play Pairs (Optional):</strong> If you have a matching
-                  pair of Duo cards, play them to trigger their effect and score
-                  points.
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <div className="bg-slate-700 w-6 h-6 rounded flex items-center justify-center font-bold text-xs">
-                  3
-                </div>
-                <div className="text-sm text-slate-300">
-                  <strong>End Round?</strong> If you have{" "}
-                  <strong>{STOP_THRESHOLD}+ points</strong>, you can choose to
-                  end the round. Otherwise, end your turn.
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        {/* CARDS & SCORING */}
-        <div className="space-y-6">
-          <section>
-            <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-              <Sparkles className="text-purple-500" size={20} /> Card Effects
-            </h3>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="bg-red-900/20 border border-red-900/50 p-2 rounded">
-                <strong className="text-red-400 block mb-1">CRAB (Duo)</strong>
-                Look through Discard & pick 1.
-              </div>
-              <div className="bg-blue-900/20 border border-blue-900/50 p-2 rounded">
-                <strong className="text-blue-400 block mb-1">BOAT (Duo)</strong>
-                Take another turn immediately.
-              </div>
-              <div className="bg-emerald-900/20 border border-emerald-900/50 p-2 rounded">
-                <strong className="text-emerald-400 block mb-1">
-                  FISH (Duo)
-                </strong>
-                Draw the top card of the deck.
-              </div>
-              <div className="bg-slate-800 border border-slate-600 p-2 rounded">
-                <strong className="text-slate-400 block mb-1">
-                  SHARK (Duo)
-                </strong>
-                Steal a card from an opponent.
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-              <Trophy className="text-yellow-500" size={20} /> Ending the Round
-            </h3>
-            <div className="space-y-2">
-              <div className="bg-slate-800 p-3 rounded-lg border-l-4 border-slate-400">
-                <strong className="text-white block">STOP (Safe)</strong>
-                <span className="text-slate-400 text-xs">
-                  Round ends immediately. Everyone scores their points.
-                </span>
-              </div>
-              <div className="bg-slate-800 p-3 rounded-lg border-l-4 border-yellow-500">
-                <strong className="text-yellow-400 block">
-                  LAST CHANCE (Bet)
-                </strong>
-                <span className="text-slate-400 text-xs">
-                  You bet you have the most points. Everyone else gets{" "}
-                  <strong>1 final turn</strong>.
-                </span>
-                <ul className="list-disc ml-4 mt-1 text-xs text-slate-500">
-                  <li>
-                    <strong>Win Bet:</strong> You get Points + Bonus. Opponents
-                    get minimal points.
-                  </li>
-                  <li>
-                    <strong>Lose Bet:</strong> You get minimal points. Opponents
-                    score big.
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </section>
+            </section>
+          </div>
         </div>
       </div>
 
-      <div className="text-center pt-4 border-t border-slate-800">
+      <div className="text-center pt-4 border-t border-slate-800 shrink-0">
         <button
           onClick={onClose}
           className="bg-cyan-600 hover:bg-cyan-500 text-white px-8 py-3 rounded-full font-bold shadow-lg transition-transform active:scale-95"
@@ -571,6 +580,14 @@ export default function PaperOceans() {
     return () => unsub();
   }, []);
 
+  // --- RESTORE SESSION ---
+  useEffect(() => {
+    const savedRoomId = localStorage.getItem("paperoceans_roomId");
+    if (savedRoomId) {
+      setRoomId(savedRoomId);
+    }
+  }, []);
+
   // --- SYNC ---
   useEffect(() => {
     if (!roomId || !user) return;
@@ -584,6 +601,7 @@ export default function PaperOceans() {
           if (!data.players.some((p) => p.id === user.uid)) {
             setRoomId("");
             setView("menu");
+            localStorage.removeItem("paperoceans_roomId"); // Clear on kick
             setError("You have been kicked from the room.");
             return;
           }
@@ -601,6 +619,7 @@ export default function PaperOceans() {
         } else {
           setView("menu");
           setRoomId("");
+          localStorage.removeItem("paperoceans_roomId"); // Clear on delete
           setError("Session dissolved or room does not exist.");
         }
       },
@@ -745,6 +764,7 @@ export default function PaperOceans() {
         doc(db, "artifacts", APP_ID, "public", "data", "rooms", newId),
         initialData
       );
+      localStorage.setItem("paperoceans_roomId", newId); // Save Session
       setRoomId(newId);
     } catch (e) {
       console.error(e);
@@ -783,6 +803,7 @@ export default function PaperOceans() {
       }
 
       if (data.players.some((p) => p.id === user.uid)) {
+        localStorage.setItem("paperoceans_roomId", code); // Save Session
         setRoomId(code);
         setLoading(false);
         return;
@@ -801,6 +822,7 @@ export default function PaperOceans() {
       ];
 
       await updateDoc(ref, { players: newPlayers });
+      localStorage.setItem("paperoceans_roomId", code); // Save Session
       setRoomId(code);
     } catch (e) {
       console.error(e);
@@ -889,6 +911,7 @@ export default function PaperOceans() {
       console.log("Room might already be deleted");
     }
 
+    localStorage.removeItem("paperoceans_roomId"); // Clear Session
     setRoomId("");
     setView("menu");
     setShowLeaveConfirm(false);
@@ -1763,7 +1786,7 @@ export default function PaperOceans() {
               </div>
             ) : (
               /* Standard Board */
-              <div className="flex gap-8 items-center">
+              <div className="flex gap-4 md:gap-8 items-center">
                 {/* Deck */}
                 <div
                   onClick={() =>
@@ -1772,7 +1795,7 @@ export default function PaperOceans() {
                       : null
                   }
                   className={`
-                    w-24 h-36 md:w-28 md:h-44 bg-slate-800 rounded-xl border-2 border-slate-600 flex flex-col items-center justify-center relative shadow-xl transition-all
+                    w-20 h-28 sm:w-24 sm:h-36 md:w-28 md:h-44 bg-slate-800 rounded-xl border-2 border-slate-600 flex flex-col items-center justify-center relative shadow-xl transition-all
                     ${
                       isMyTurn && gameState.turnState === "DRAW"
                         ? "cursor-pointer hover:-translate-y-2 hover:border-cyan-400 hover:shadow-cyan-500/20 ring-4 ring-cyan-500/20"
@@ -1804,7 +1827,7 @@ export default function PaperOceans() {
                       : null
                   }
                   className={`
-                    w-24 h-36 md:w-28 md:h-44 bg-black/20 rounded-xl border-2 border-dashed border-slate-700 flex items-center justify-center relative
+                    w-20 h-28 sm:w-24 sm:h-36 md:w-28 md:h-44 bg-black/20 rounded-xl border-2 border-dashed border-slate-700 flex items-center justify-center relative
                     ${
                       isMyTurn &&
                       gameState.turnState === "DRAW" &&
@@ -1852,7 +1875,7 @@ export default function PaperOceans() {
           {/* PLAYER HUD */}
           <div className="flex-none bg-slate-900 border-t border-slate-800 p-3 pb-6 relative z-20 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
             {/* Action Bar (Above Cards) */}
-            <div className="flex justify-between items-end mb-3">
+            <div className="flex flex-wrap justify-between items-end mb-3 gap-2">
               <div className="flex gap-4 items-center">
                 <div className="flex flex-col">
                   <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider text-yellow-500/80">
@@ -1874,7 +1897,7 @@ export default function PaperOceans() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-2 items-center">
+              <div className="flex gap-2 items-center flex-wrap justify-end ml-auto">
                 {/* Duo Button */}
                 {selectedHandIndices.length === 2 &&
                   isMyTurn &&
@@ -1944,7 +1967,7 @@ export default function PaperOceans() {
               </div>
 
               {/* My Hand (Scrollable) */}
-              <div className="flex-1 overflow-x-auto pb-2 flex items-center gap-2 px-2">
+              <div className="flex-1 overflow-x-auto pb-2 pt-8 flex items-center gap-2 px-2">
                 {me.hand.map((c, i) => {
                   const isSelected = selectedHandIndices.includes(i);
                   return (
