@@ -24,13 +24,13 @@ import {
   Ship,
   Scissors, // Crabs
   Sword, // Sharks
-  Circle, // Shells
+  Shell, // Shells
   Aperture, // Octopus
-  Snowflake, // Penguin
+  Snowflake, // Penguin/Snowman
   Sparkles, // Mermaid
   Waves,
   Trophy,
-  User,
+  User, // Sailor
   LogOut,
   RotateCcw,
   BookOpen,
@@ -39,19 +39,26 @@ import {
   CheckCircle,
   AlertTriangle,
   Hand,
-  Eye,
+  Eye, // Lighthouse
   Crown,
+  Sailboat,
+  FishingHook,
+  Kayak,
   Play,
   Copy,
   Trash2,
   HelpCircle,
   Hammer,
+  Bird, // Generic fallback
+  Compass,
+  ShipWheel, // Captain fallback if needed
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
 // CONFIGURATION
 // ---------------------------------------------------------------------------
 
+// Uses environment variables for Firebase Config in Canvas
 const firebaseConfig = {
   apiKey: "AIzaSyBjIjK53vVJW1y5RaqEFGSFp0ECVDBEe1o",
   authDomain: "game-hub-ff8aa.firebaseapp.com",
@@ -64,12 +71,15 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const APP_ID = typeof __app_id !== "undefined" ? __app_id : "paper-oceans";
-const GAME_ID = "18";
-// ---------------------------------------------------------------------------
-// GAME DATA & CONSTANTS
-// ---------------------------------------------------------------------------
-const WIN_THRESHOLD = 30;
+
 const STOP_THRESHOLD = 7;
+
+// Dynamic Winning Points based on player count
+const GET_WIN_THRESHOLD = (playerCount) => {
+  if (playerCount === 4) return 30;
+  if (playerCount === 3) return 35;
+  return 40; // Default/2 players
+};
 
 const CARD_TYPES = {
   // --- DUOS (Action Pairs) ---
@@ -84,18 +94,20 @@ const CARD_TYPES = {
     border: "border-red-700",
     desc: "Pair: Look through discard pile and pick 1 card.",
     count: 9,
+    cardColor: "RED",
   },
   BOAT: {
     id: "BOAT",
     name: "Origami Boat",
     type: "DUO",
     points: 0,
-    icon: Ship,
+    icon: Sailboat,
     color: "text-blue-400",
     bg: "bg-blue-950",
     border: "border-blue-700",
     desc: "Pair: Take another turn immediately.",
     count: 8,
+    cardColor: "BLUE",
   },
   FISH: {
     id: "FISH",
@@ -108,6 +120,7 @@ const CARD_TYPES = {
     border: "border-emerald-700",
     desc: "Pair: Draw the top card of the deck.",
     count: 7,
+    cardColor: "GREEN",
   },
   SHARK: {
     id: "SHARK",
@@ -120,6 +133,7 @@ const CARD_TYPES = {
     border: "border-slate-600",
     desc: "Pair: Steal a random card from an opponent.",
     count: 5,
+    cardColor: "BLACK",
   },
 
   // --- COLLECTORS (Set Collection) ---
@@ -128,12 +142,13 @@ const CARD_TYPES = {
     name: "Spiral Shell",
     type: "COLLECT",
     points: 0,
-    icon: Circle,
+    icon: Shell,
     color: "text-amber-200",
     bg: "bg-amber-950",
     border: "border-amber-700",
     desc: "Set: 2pts per shell.",
     count: 6,
+    cardColor: "YELLOW",
   },
   OCTOPUS: {
     id: "OCTOPUS",
@@ -146,19 +161,36 @@ const CARD_TYPES = {
     border: "border-purple-700",
     desc: "Set: 3pts per octopus.",
     count: 5,
+    cardColor: "PURPLE",
   },
   PENGUIN: {
     id: "PENGUIN",
     name: "Ice Penguin",
     type: "COLLECT",
     points: 0,
-    icon: Snowflake,
+    icon: Bird, // Using Cloud/User to distinguish from Snowman
     color: "text-cyan-200",
     bg: "bg-cyan-950",
     border: "border-cyan-700",
     desc: "Set: 1=1pt, 2=3pts, 3=5pts.",
     count: 3,
+    cardColor: "CYAN",
   },
+  SAILOR: {
+    id: "SAILOR",
+    name: "Lost Sailor",
+    type: "COLLECT",
+    points: 0,
+    icon: Kayak,
+    color: "text-orange-300",
+    bg: "bg-orange-950",
+    border: "border-orange-700",
+    desc: "Set: 1=0pts, 2=5pts.",
+    count: 2,
+    cardColor: "ORANGE",
+  },
+
+  // --- MULTIPLIERS ---
   MERMAID: {
     id: "MERMAID",
     name: "Mystic Mermaid",
@@ -170,18 +202,60 @@ const CARD_TYPES = {
     border: "border-fuchsia-700",
     desc: "+1 Point for each card of your most common color.",
     count: 4,
+    cardColor: "MULTI",
   },
-};
-
-const CARD_COLORS = {
-  CRAB: "RED",
-  BOAT: "BLUE",
-  FISH: "GREEN",
-  SHARK: "BLACK",
-  SHELL: "YELLOW",
-  OCTOPUS: "PURPLE",
-  PENGUIN: "CYAN",
-  MERMAID: "MULTI",
+  SHIP: {
+    id: "SHIP",
+    name: "Ship",
+    type: "MULTIPLIER",
+    points: 0,
+    icon: Ship,
+    color: "text-blue-200",
+    bg: "bg-blue-900",
+    border: "border-blue-500",
+    desc: "+1 Point for each Boat.",
+    count: 1,
+    cardColor: "BLUE", // Assuming Lighthouse is Blue-ish
+  },
+  SHOAL: {
+    id: "SHOAL",
+    name: "Shoal of Fish",
+    type: "MULTIPLIER",
+    points: 0,
+    icon: FishingHook,
+    color: "text-emerald-200",
+    bg: "bg-emerald-900",
+    border: "border-emerald-500",
+    desc: "+1 Point for each Fish.",
+    count: 1,
+    cardColor: "GREEN",
+  },
+  SNOWMAN: {
+    id: "SNOWMAN",
+    name: "Snowman",
+    type: "MULTIPLIER",
+    points: 0,
+    icon: Snowflake,
+    color: "text-cyan-100",
+    bg: "bg-cyan-900",
+    border: "border-cyan-500",
+    desc: "+2 Points for each Penguin.",
+    count: 1,
+    cardColor: "CYAN",
+  },
+  CAPTAIN: {
+    id: "CAPTAIN",
+    name: "Captain",
+    type: "MULTIPLIER",
+    points: 0,
+    icon: ShipWheel,
+    color: "text-orange-200",
+    bg: "bg-orange-900",
+    border: "border-orange-500",
+    desc: "+3 Points for each Sailor.",
+    count: 1,
+    cardColor: "ORANGE",
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -206,41 +280,76 @@ const createDeck = () => {
   return deck;
 };
 
-const calculatePoints = (hand, tableau) => {
+const calculatePoints = (hand, tableau, isLastChance = false) => {
   const allCards = [...hand, ...tableau];
   let score = 0;
 
-  // 1. Duos (Only score if they are in tableau as pairs)
+  // 1. Duos (Score for every pair in Hand + Tableau)
   const duoTypes = ["CRAB", "BOAT", "FISH", "SHARK"];
   duoTypes.forEach((type) => {
-    const count = tableau.filter((c) => c.type === type).length;
+    // Count ALL cards of this type (played + hand)
+    const count = allCards.filter((c) => c.type === type).length;
     score += Math.floor(count / 2);
   });
 
   // 2. Collectors
   const shells = allCards.filter((c) => c.type === "SHELL").length;
-  if (shells >= 1) score += shells * 2;
+  if (shells > 0) score += shells * 2;
 
   const octopuses = allCards.filter((c) => c.type === "OCTOPUS").length;
   score += octopuses * 3;
 
   const penguins = allCards.filter((c) => c.type === "PENGUIN").length;
   if (penguins === 1) score += 1;
-  if (penguins === 2) score += 3;
-  if (penguins >= 3) score += 5;
+  else if (penguins === 2) score += 3;
+  else if (penguins >= 3) score += 5;
 
-  // 3. Mermaids
+  const sailors = allCards.filter((c) => c.type === "SAILOR").length;
+  if (sailors === 2) score += 5;
+
+  // 3. Multipliers
+  const hasShip = allCards.some((c) => c.type === "SHIP");
+  if (hasShip) {
+    const boats = allCards.filter((c) => c.type === "BOAT").length;
+    score += boats;
+  }
+
+  const hasShoal = allCards.some((c) => c.type === "SHOAL");
+  if (hasShoal) {
+    const fish = allCards.filter((c) => c.type === "FISH").length;
+    score += fish;
+  }
+
+  const hasSnowman = allCards.some((c) => c.type === "SNOWMAN");
+  if (hasSnowman) {
+    score += penguins * 2;
+  }
+
+  const hasCaptain = allCards.some((c) => c.type === "CAPTAIN");
+  if (hasCaptain) {
+    score += sailors * 3;
+  }
+
+  // 4. Mermaids & Color Bonus
   const mermaids = allCards.filter((c) => c.type === "MERMAID").length;
+
+  // Calculate max color frequency
+  const colorCounts = {};
+  allCards.forEach((c) => {
+    const def = CARD_TYPES[c.type];
+    const color = def ? def.cardColor : null;
+    if (color && color !== "MULTI") {
+      colorCounts[color] = (colorCounts[color] || 0) + 1;
+    }
+  });
+  const maxColorCount = Math.max(0, ...Object.values(colorCounts));
+
   if (mermaids > 0) {
-    const colorCounts = {};
-    allCards.forEach((c) => {
-      const color = CARD_COLORS[c.type];
-      if (color && color !== "MULTI") {
-        colorCounts[color] = (colorCounts[color] || 0) + 1;
-      }
-    });
-    const maxColorCount = Math.max(0, ...Object.values(colorCounts));
+    // Standard rule: 1 pt per color per mermaid
     score += mermaids * maxColorCount;
+  } else if (isLastChance) {
+    // Relaxed rule: If no mermaid, but it's Last Chance, get flat color bonus
+    score += maxColorCount;
   }
 
   return score;
@@ -325,10 +434,9 @@ const CardDisplay = ({
   const baseClasses =
     "relative rounded-xl border-2 shadow-lg transition-all flex flex-col items-center justify-between cursor-pointer active:scale-95 select-none";
 
-  // Adjusted sizes for mobile to prevent overlaps
   const sizeClasses = small
-    ? "w-14 h-20 md:w-16 md:h-24 p-1" // Reduced small size slightly
-    : "w-20 h-28 sm:w-24 sm:h-36 md:w-28 md:h-44 lg:w-32 lg:h-48 p-2 md:p-3"; // Reduced default size on mobile
+    ? "w-14 h-20 md:w-16 md:h-24 p-1"
+    : "w-20 h-28 sm:w-24 sm:h-36 md:w-28 md:h-44 lg:w-32 lg:h-48 p-2 md:p-3";
 
   return (
     <div
@@ -346,7 +454,13 @@ const CardDisplay = ({
     >
       <div className="w-full flex justify-between items-center text-[8px] md:text-[10px] font-bold text-white/70">
         <span>
-          {card.type === "DUO" ? "DUO" : card.type === "COLLECT" ? "SET" : "X"}
+          {card.type === "DUO"
+            ? "DUO"
+            : card.type === "COLLECT"
+            ? "SET"
+            : card.type === "MULTIPLIER"
+            ? "MULT"
+            : "X"}
         </span>
         {count > 1 && (
           <span className="bg-black/50 px-1 rounded text-white">x{count}</span>
@@ -369,7 +483,7 @@ const CardDisplay = ({
   );
 };
 
-const HowToPlayModal = ({ onClose }) => (
+const HowToPlayModal = ({ onClose, winPoints }) => (
   <div className="fixed inset-0 z-[200] bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
     <div className="bg-slate-900 border border-slate-700 w-full max-w-4xl rounded-3xl shadow-2xl p-6 md:p-10 relative my-8 max-h-[90vh] flex flex-col">
       <button
@@ -398,9 +512,11 @@ const HowToPlayModal = ({ onClose }) => (
               </h3>
               <p className="text-slate-300 text-sm leading-relaxed">
                 Win rounds to gain points. The first player to reach{" "}
-                <strong>{WIN_THRESHOLD} points</strong> wins the game. A round
-                ends when a player decides to <strong>STOP</strong> or call{" "}
-                <strong>LAST CHANCE</strong>.
+                <strong>{winPoints} points</strong> wins the game.
+                <br />
+                <br />
+                <strong className="text-fuchsia-400">INSTANT WIN:</strong>{" "}
+                Collect 4 Mermaids to win immediately!
               </p>
             </section>
 
@@ -433,7 +549,7 @@ const HowToPlayModal = ({ onClose }) => (
                   <div className="text-sm text-slate-300">
                     <strong>Play Pairs (Optional):</strong> If you have a
                     matching pair of Duo cards, play them to trigger their
-                    effect and score points.
+                    effect. Note: Duos score points whether in hand or played!
                   </div>
                 </div>
                 <div className="flex gap-3">
@@ -443,7 +559,7 @@ const HowToPlayModal = ({ onClose }) => (
                   <div className="text-sm text-slate-300">
                     <strong>End Round?</strong> If you have{" "}
                     <strong>{STOP_THRESHOLD}+ points</strong>, you can choose to
-                    end the round. Otherwise, end your turn.
+                    end the round.
                   </div>
                 </div>
               </div>
@@ -454,32 +570,26 @@ const HowToPlayModal = ({ onClose }) => (
           <div className="space-y-6">
             <section>
               <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                <Sparkles className="text-purple-500" size={20} /> Card Effects
+                <Sparkles className="text-purple-500" size={20} /> New Cards
               </h3>
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="bg-red-900/20 border border-red-900/50 p-2 rounded">
-                  <strong className="text-red-400 block mb-1">
-                    CRAB (Duo)
-                  </strong>
-                  Look through Discard & pick 1.
+                <div className="bg-orange-900/20 border border-orange-900/50 p-2 rounded">
+                  <strong className="text-orange-400 block mb-1">SAILOR</strong>
+                  1 Sailor = 0pts. 2 Sailors = 5pts.
                 </div>
                 <div className="bg-blue-900/20 border border-blue-900/50 p-2 rounded">
-                  <strong className="text-blue-400 block mb-1">
-                    BOAT (Duo)
-                  </strong>
-                  Take another turn immediately.
+                  <strong className="text-blue-400 block mb-1">SHIP</strong>
+                  +1 Point per Boat card.
                 </div>
-                <div className="bg-emerald-900/20 border border-emerald-900/50 p-2 rounded">
-                  <strong className="text-emerald-400 block mb-1">
-                    FISH (Duo)
-                  </strong>
-                  Draw the top card of the deck.
+                <div className="bg-cyan-900/20 border border-cyan-900/50 p-2 rounded">
+                  <strong className="text-cyan-400 block mb-1">SNOWMAN</strong>
+                  +2 Points per Penguin card.
                 </div>
-                <div className="bg-slate-800 border border-slate-600 p-2 rounded">
-                  <strong className="text-slate-400 block mb-1">
-                    SHARK (Duo)
+                <div className="bg-orange-900/20 border border-orange-900/50 p-2 rounded">
+                  <strong className="text-orange-400 block mb-1">
+                    CAPTAIN
                   </strong>
-                  Steal a card from an opponent.
+                  +3 Points per Sailor card.
                 </div>
               </div>
             </section>
@@ -504,16 +614,10 @@ const HowToPlayModal = ({ onClose }) => (
                     You bet you have the most points. Everyone else gets{" "}
                     <strong>1 final turn</strong>.
                   </span>
-                  <ul className="list-disc ml-4 mt-1 text-xs text-slate-500">
-                    <li>
-                      <strong>Win Bet:</strong> You get Points + Bonus.
-                      Opponents get minimal points.
-                    </li>
-                    <li>
-                      <strong>Lose Bet:</strong> You get minimal points.
-                      Opponents score big.
-                    </li>
-                  </ul>
+                  <div className="text-xs text-slate-500 mt-1">
+                    <em>Relaxed Rule:</em> Even if you have 0 Mermaids, you get
+                    the Color Bonus during Last Chance scoring!
+                  </div>
                 </div>
               </div>
             </section>
@@ -601,7 +705,7 @@ export default function PaperOceans() {
           if (!data.players.some((p) => p.id === user.uid)) {
             setRoomId("");
             setView("menu");
-            localStorage.removeItem("paperoceans_roomId"); // Clear on kick
+            localStorage.removeItem("paperoceans_roomId");
             setError("You have been kicked from the room.");
             return;
           }
@@ -619,7 +723,7 @@ export default function PaperOceans() {
         } else {
           setView("menu");
           setRoomId("");
-          localStorage.removeItem("paperoceans_roomId"); // Clear on delete
+          localStorage.removeItem("paperoceans_roomId");
           setError("Session dissolved or room does not exist.");
         }
       },
@@ -631,21 +735,50 @@ export default function PaperOceans() {
     return () => unsub();
   }, [roomId, user]);
 
+  // --- INSTANT WIN CHECK (4 MERMAIDS) ---
+  useEffect(() => {
+    if (!gameState || !gameState.players || gameState.status === "finished")
+      return;
+
+    const checkInstantWin = async () => {
+      const winner = gameState.players.find((p) => {
+        const all = [...p.hand, ...p.tableau];
+        const mermaids = all.filter((c) => c.type === "MERMAID").length;
+        return mermaids === 4;
+      });
+
+      if (winner && gameState.status !== "finished") {
+        if (gameState.hostId === user.uid) {
+          await updateDoc(
+            doc(db, "artifacts", APP_ID, "public", "data", "rooms", roomId),
+            {
+              status: "finished",
+              winnerId: winner.id,
+              logs: arrayUnion({
+                text: `INSTANT WIN! ${winner.name} found all 4 Mermaids!`,
+                type: "success",
+                id: Date.now(),
+              }),
+            }
+          );
+        }
+      }
+    };
+    checkInstantWin();
+  }, [
+    gameState?.players,
+    gameState?.status,
+    gameState?.hostId,
+    roomId,
+    user?.uid,
+  ]);
+
   // --- GLOBAL ALERT SYSTEM ---
   useEffect(() => {
     if (!roomId) {
       lastLogIdRef.current = null;
     }
   }, [roomId]);
-
-  useEffect(() => {
-    const unsub = onSnapshot(doc(db, "game_hub_settings", "config"), (doc) => {
-      if (doc.exists() && doc.data()[GAME_ID]?.maintenance)
-        setIsMaintenance(true);
-      else setIsMaintenance(false);
-    });
-    return () => unsub();
-  }, []);
 
   useEffect(() => {
     if (!gameState?.logs || gameState.logs.length === 0) return;
@@ -661,7 +794,6 @@ export default function PaperOceans() {
 
     lastLogIdRef.current = latestLog.id;
 
-    // Improved Log Parsing
     const text = latestLog.text;
     let title = "";
     let sub = "";
@@ -708,6 +840,11 @@ export default function PaperOceans() {
       title = "BET FAILED!";
       sub = "The challenger fell short.";
       Icon = AlertTriangle;
+    } else if (text.includes("INSTANT WIN")) {
+      isImportant = true;
+      title = "INSTANT WIN!";
+      sub = "The Mermaids have chosen a winner!";
+      Icon = Crown;
     } else if (text.includes("Round") && text.includes("Start")) {
       isImportant = true;
       title = "ANCHORS AWEIGH!";
@@ -1277,53 +1414,51 @@ export default function PaperOceans() {
     const bettorId = gameState.bettingPlayerId;
     const bettor = players.find((p) => p.id === bettorId);
 
-    const bettorPoints = calculatePoints(bettor.hand, bettor.tableau);
+    // Calc points for bettor (IsLastChance=true so if they have no mermaids they still get bonus?
+    // User Rule: "that means color bonus rules apply even if there is no mermaid."
+    // We apply this to EVERYONE during Last Chance resolution or just Bettor?
+    // Usually it applies to the hand valuation for everyone in Last Chance mode.
+    const bettorPoints = calculatePoints(bettor.hand, bettor.tableau, true);
+
     let bettorWon = true;
 
     players.forEach((p) => {
       if (p.id !== bettorId) {
-        const pts = calculatePoints(p.hand, p.tableau);
+        const pts = calculatePoints(p.hand, p.tableau, true);
         if (pts >= bettorPoints) bettorWon = false;
       }
     });
 
+    // Helper to calculate JUST the color bonus part for the Win/Loss logic
+    // (In Sea Salt, if you win bet, opps only score color bonus)
+    const getColorBonusOnly = (p) => {
+      const all = [...p.hand, ...p.tableau];
+      const mermaids = all.filter((c) => c.type === "MERMAID").length;
+      const colorCounts = {};
+      all.forEach((c) => {
+        const def = CARD_TYPES[c.type];
+        const color = def ? def.cardColor : null;
+        if (color && color !== "MULTI")
+          colorCounts[color] = (colorCounts[color] || 0) + 1;
+      });
+      const max = Math.max(0, ...Object.values(colorCounts));
+      // Relaxed rule applies here too
+      if (mermaids > 0) return mermaids * max;
+      return max;
+    };
+
     if (bettorWon) {
-      bettor.score += bettorPoints + 5;
+      bettor.score += bettorPoints + 5; // Bettor gets full + Bonus
       players.forEach((p) => {
         if (p.id !== bettorId) {
-          const allCards = [...p.hand, ...p.tableau];
-          const mermaids = allCards.filter((c) => c.type === "MERMAID").length;
-          let colorBonus = 0;
-          if (mermaids > 0) {
-            const colorCounts = {};
-            allCards.forEach((c) => {
-              const col = CARD_COLORS[c.type];
-              if (col && col !== "MULTI")
-                colorCounts[col] = (colorCounts[col] || 0) + 1;
-            });
-            colorBonus = mermaids * Math.max(0, ...Object.values(colorCounts));
-          }
-          p.score += colorBonus;
+          p.score += getColorBonusOnly(p); // Opponents get Color Bonus only
         }
       });
     } else {
-      const allCards = [...bettor.hand, ...bettor.tableau];
-      const mermaids = allCards.filter((c) => c.type === "MERMAID").length;
-      let colorBonus = 0;
-      if (mermaids > 0) {
-        const colorCounts = {};
-        allCards.forEach((c) => {
-          const col = CARD_COLORS[c.type];
-          if (col && col !== "MULTI")
-            colorCounts[col] = (colorCounts[col] || 0) + 1;
-        });
-        colorBonus = mermaids * Math.max(0, ...Object.values(colorCounts));
-      }
-      bettor.score += colorBonus;
-
+      bettor.score += getColorBonusOnly(bettor); // Bettor gets Color Bonus only
       players.forEach((p) => {
         if (p.id !== bettorId) {
-          p.score += calculatePoints(p.hand, p.tableau);
+          p.score += calculatePoints(p.hand, p.tableau, true); // Opponents get full score
         }
       });
     }
@@ -1350,8 +1485,9 @@ export default function PaperOceans() {
   const checkForGameWin = async (players, rId) => {
     const sorted = [...players].sort((a, b) => b.score - a.score);
     const winner = sorted[0];
+    const threshold = GET_WIN_THRESHOLD(players.length);
 
-    if (winner.score >= WIN_THRESHOLD) {
+    if (winner.score >= threshold) {
       await updateDoc(
         doc(db, "artifacts", APP_ID, "public", "data", "rooms", rId),
         {
@@ -1375,20 +1511,6 @@ export default function PaperOceans() {
             Tide is low. Folding operations paused.
           </p>
         </div>
-        {/* Add Spacing Between Boxes */}
-        <div className="h-8"></div>
-
-        {/* Clickable Second Card */}
-        <a href="https://rawfidkshuvo.github.io/gamehub/">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <div className="text-center pb-12 animate-pulse">
-              <div className="inline-flex items-center gap-3 px-8 py-4 bg-slate-900/50 rounded-full border border-indigo-500/20 text-indigo-300 font-bold tracking-widest text-sm uppercase backdrop-blur-sm">
-                <Sparkles size={16} /> Visit Gamehub...Try our other releases...{" "}
-                <Sparkles size={16} />
-              </div>
-            </div>
-          </div>
-        </a>
       </div>
     );
   }
@@ -1401,7 +1523,12 @@ export default function PaperOceans() {
         <FloatingBackground />
 
         {/* GUIDE MODAL */}
-        {showGuide && <HowToPlayModal onClose={() => setShowGuide(false)} />}
+        {showGuide && (
+          <HowToPlayModal
+            onClose={() => setShowGuide(false)}
+            winPoints={GET_WIN_THRESHOLD(2)}
+          />
+        )}
 
         <div className="z-10 text-center mb-10 animate-in fade-in zoom-in duration-700">
           <Anchor
@@ -1481,7 +1608,12 @@ export default function PaperOceans() {
         <FloatingBackground />
 
         {/* GUIDE MODAL */}
-        {showGuide && <HowToPlayModal onClose={() => setShowGuide(false)} />}
+        {showGuide && (
+          <HowToPlayModal
+            onClose={() => setShowGuide(false)}
+            winPoints={GET_WIN_THRESHOLD(gameState.players.length)}
+          />
+        )}
 
         <div className="z-10 w-full max-w-lg bg-slate-900/90 backdrop-blur p-8 rounded-2xl border border-cyan-500/30 shadow-2xl animate-in slide-in-from-bottom-8">
           <div className="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
@@ -1607,7 +1739,12 @@ export default function PaperOceans() {
         <FloatingBackground />
 
         {/* GUIDE MODAL IN GAME */}
-        {showGuide && <HowToPlayModal onClose={() => setShowGuide(false)} />}
+        {showGuide && (
+          <HowToPlayModal
+            onClose={() => setShowGuide(false)}
+            winPoints={GET_WIN_THRESHOLD(gameState.players.length)}
+          />
+        )}
 
         {feedback && (
           <FeedbackOverlay
@@ -1698,8 +1835,6 @@ export default function PaperOceans() {
             {gameState.players.map((p, i) => {
               if (p.id === user.uid) return null;
               const isActive = gameState.turnIndex === i;
-              // Simplified calc for opponent display (hidden hand)
-              const visiblePoints = calculatePoints([], p.tableau);
 
               return (
                 <div
