@@ -1415,23 +1415,22 @@ export default function PaperOceans() {
     const bettorId = gameState.bettingPlayerId;
     const bettor = players.find((p) => p.id === bettorId);
 
-    // Calc points for bettor (IsLastChance=true so if they have no mermaids they still get bonus?
-    // User Rule: "that means color bonus rules apply even if there is no mermaid."
-    // We apply this to EVERYONE during Last Chance resolution or just Bettor?
-    // Usually it applies to the hand valuation for everyone in Last Chance mode.
-    const bettorPoints = calculatePoints(bettor.hand, bettor.tableau, true);
+    // FIXED: Calculate Hand Strength using STRICT rules (isLastChance = false).
+    // The "Relaxed" rule is for losers only, so it shouldn't help you win the bet.
+    const bettorPoints = calculatePoints(bettor.hand, bettor.tableau, false);
 
     let bettorWon = true;
 
     players.forEach((p) => {
       if (p.id !== bettorId) {
-        const pts = calculatePoints(p.hand, p.tableau, true);
+        // FIXED: Opponents compete with STRICT score.
+        const pts = calculatePoints(p.hand, p.tableau, false);
         if (pts >= bettorPoints) bettorWon = false;
       }
     });
 
-    // Helper to calculate JUST the color bonus part for the Win/Loss logic
-    // (In Sea Salt, if you win bet, opps only score color bonus)
+    // Helper: Calculates Color Bonus with the "Relaxed/Pity" rule built-in.
+    // Used specifically for the losers of the round.
     const getColorBonusOnly = (p) => {
       const all = [...p.hand, ...p.tableau];
       const mermaids = all.filter((c) => c.type === "MERMAID").length;
@@ -1443,29 +1442,37 @@ export default function PaperOceans() {
           colorCounts[color] = (colorCounts[color] || 0) + 1;
       });
       const max = Math.max(0, ...Object.values(colorCounts));
-      // Relaxed rule applies here too
+
+      // If mermaids exist, multiply. If 0 mermaids, return just the count (Pity Rule).
       if (mermaids > 0) return mermaids * max;
       return max;
     };
 
     if (bettorWon) {
-      bettor.score += bettorPoints + 5; // Bettor gets full + Bonus
+      // SCENARIO: BETTOR WINS
+      // Bettor: Standard Score + 5 Bonus (No Pity Points)
+      bettor.score += bettorPoints + 5;
+
       players.forEach((p) => {
         if (p.id !== bettorId) {
-          p.score += getColorBonusOnly(p); // Opponents get Color Bonus only
+          // Opponents (Losers): Get Pity Color Bonus
+          p.score += getColorBonusOnly(p);
         }
       });
     } else {
-      bettor.score += getColorBonusOnly(bettor); // Bettor gets Color Bonus only
+      // SCENARIO: BETTOR LOSES
+      // Bettor (Loser): Gets Pity Color Bonus
+      bettor.score += getColorBonusOnly(bettor);
+
       players.forEach((p) => {
         if (p.id !== bettorId) {
-          p.score += calculatePoints(p.hand, p.tableau, true); // Opponents get full score
+          // Opponents (Winners): Standard Score (No Pity Points)
+          p.score += calculatePoints(p.hand, p.tableau, false);
         }
       });
     }
 
     players.forEach((p) => (p.ready = p.id === gameState.hostId));
-
     await updateDoc(
       doc(db, "artifacts", APP_ID, "public", "data", "rooms", roomId),
       {
