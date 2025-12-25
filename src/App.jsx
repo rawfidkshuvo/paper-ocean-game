@@ -1911,7 +1911,7 @@ export default function PaperOceans() {
                 {isMyTurn && gameState.turnState === "ACTION_PHASE" && (
                   <button
                     onClick={handleEndTurn}
-                    className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg flex items-center gap-2 transition-colors"
+                    className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg flex items-center gap-2 transition-colors animate-bounce"
                   >
                     End Turn <RotateCcw size={16} />
                   </button>
