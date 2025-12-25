@@ -44,6 +44,7 @@ import {
   Sailboat,
   FishingHook,
   Kayak,
+  Origami,
   Play,
   Copy,
   Trash2,
@@ -368,7 +369,7 @@ const FloatingBackground = () => (
 
 const GameLogo = () => (
   <div className="flex items-center justify-center gap-2 opacity-40 mt-auto pb-4 pt-2 relative z-10 pointer-events-none select-none">
-    <Ship size={14} className="text-cyan-500" />
+    <Origami size={14} className="text-cyan-500" />
     <span className="text-[10px] font-black tracking-[0.2em] text-cyan-500 uppercase">
       PAPER OCEANS
     </span>
@@ -1531,7 +1532,7 @@ export default function PaperOceans() {
         )}
 
         <div className="z-10 text-center mb-10 animate-in fade-in zoom-in duration-700">
-          <Anchor
+          <Origami
             size={64}
             className="text-cyan-400 mx-auto mb-4 animate-bounce"
           />
@@ -1595,6 +1596,9 @@ export default function PaperOceans() {
           >
             <BookOpen size={16} /> How to Play
           </button>
+        </div>
+        <div className="absolute bottom-4 text-slate-600 text-xs text-center">
+          Inspired by Sea, Salt & Paper. <br /> A tribute game.
         </div>
       </div>
     );
@@ -1732,7 +1736,8 @@ export default function PaperOceans() {
     const canEndRound =
       currentPoints >= STOP_THRESHOLD &&
       isMyTurn &&
-      gameState.turnState === "ACTION_PHASE";
+      gameState.turnState === "ACTION_PHASE" &&
+      gameState.status !== "last_chance"; // Add this line
 
     return (
       <div className="fixed inset-0 bg-slate-950 text-white overflow-hidden flex flex-col font-sans select-none">
