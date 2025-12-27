@@ -1927,15 +1927,14 @@ export default function PaperOceans() {
                 </h3>
                 <div className="flex gap-4">
                   {gameState.tempDraw.map((c, i) => (
-                    <div key={i} className="flex flex-col items-center gap-3">
+                    <button
+                      key={i}
+                      onClick={() => handleKeepCard(i)}
+                      className="transition-transform hover:scale-105 active:scale-95 focus:outline-none"
+                      title="Click to keep this card"
+                    >
                       <CardDisplay cardType={c.type} highlight={true} />
-                      <button
-                        onClick={() => handleKeepCard(i)}
-                        className="bg-emerald-500 hover:bg-emerald-400 text-white px-6 py-2 rounded-full font-bold text-sm shadow-lg transition-transform active:scale-95"
-                      >
-                        Keep
-                      </button>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
