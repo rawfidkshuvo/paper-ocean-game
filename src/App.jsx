@@ -484,159 +484,182 @@ const CardDisplay = ({
   );
 };
 
-const HowToPlayModal = ({ onClose, winPoints }) => (
-  <div className="fixed inset-0 z-[200] bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
-    <div className="bg-slate-900 border border-slate-700 w-full max-w-4xl rounded-3xl shadow-2xl p-6 md:p-10 relative my-8 max-h-[90vh] flex flex-col">
-      <button
-        onClick={onClose}
-        className="absolute top-4 right-4 p-2 bg-slate-800 rounded-full hover:bg-red-500/20 hover:text-red-400 transition-colors z-10"
-      >
-        <X size={24} />
-      </button>
+const HowToPlayModal = ({ onClose, winPoints }) => {
+  // Helper to filter cards by type for the guide
+  const getCardsByType = (type) =>
+    Object.values(CARD_TYPES).filter((c) => c.type === type);
 
-      <div className="text-center mb-6 shrink-0">
-        <h2 className="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 tracking-widest uppercase mb-2">
-          How To Play
-        </h2>
-        <p className="text-slate-400">
-          Collect cards, play pairs, and bet on your victory.
-        </p>
-      </div>
-
-      <div className="overflow-y-auto pr-2 custom-scrollbar flex-1">
-        <div className="grid md:grid-cols-2 gap-8 mb-8">
-          {/* BASICS */}
-          <div className="space-y-6">
-            <section>
-              <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                <Anchor className="text-cyan-500" size={20} /> The Goal
-              </h3>
-              <p className="text-slate-300 text-sm leading-relaxed">
-                Win rounds to gain points. The first player to reach{" "}
-                <strong>{winPoints} points</strong> wins the game.
-                <br />
-                <br />
-                <strong className="text-fuchsia-400">INSTANT WIN:</strong>{" "}
-                Collect 4 Mermaids to win immediately!
-              </p>
-            </section>
-
-            <section>
-              <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                <RotateCcw className="text-emerald-500" size={20} /> Your Turn
-              </h3>
-              <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700 space-y-3">
-                <div className="flex gap-3">
-                  <div className="bg-slate-700 w-6 h-6 rounded flex items-center justify-center font-bold text-xs shrink-0">
-                    1
-                  </div>
-                  <div className="text-sm text-slate-300">
-                    <strong>Draw:</strong> Choose one:
-                    <ul className="list-disc ml-4 mt-1 text-slate-400">
-                      <li>
-                        Draw <strong>2 cards</strong> from Deck, keep{" "}
-                        <strong>1</strong>.
-                      </li>
-                      <li>
-                        Take <strong>1 card</strong> from Discard.
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <div className="bg-slate-700 w-6 h-6 rounded flex items-center justify-center font-bold text-xs shrink-0">
-                    2
-                  </div>
-                  <div className="text-sm text-slate-300">
-                    <strong>Play Pairs (Optional):</strong> If you have a
-                    matching pair of Duo cards, play them to trigger their
-                    effect. Note: Duos score points whether in hand or played!
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <div className="bg-slate-700 w-6 h-6 rounded flex items-center justify-center font-bold text-xs shrink-0">
-                    3
-                  </div>
-                  <div className="text-sm text-slate-300">
-                    <strong>End Round?</strong> If you have{" "}
-                    <strong>{STOP_THRESHOLD}+ points</strong>, you can choose to
-                    end the round.
-                  </div>
-                </div>
-              </div>
-            </section>
-          </div>
-
-          {/* CARDS & SCORING */}
-          <div className="space-y-6">
-            <section>
-              <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                <Sparkles className="text-purple-500" size={20} /> New Cards
-              </h3>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="bg-orange-900/20 border border-orange-900/50 p-2 rounded">
-                  <strong className="text-orange-400 block mb-1">SAILOR</strong>
-                  1 Sailor = 0pts. 2 Sailors = 5pts.
-                </div>
-                <div className="bg-blue-900/20 border border-blue-900/50 p-2 rounded">
-                  <strong className="text-blue-400 block mb-1">SHIP</strong>
-                  +1 Point per Boat card.
-                </div>
-                <div className="bg-cyan-900/20 border border-cyan-900/50 p-2 rounded">
-                  <strong className="text-cyan-400 block mb-1">SNOWMAN</strong>
-                  +2 Points per Penguin card.
-                </div>
-                <div className="bg-orange-900/20 border border-orange-900/50 p-2 rounded">
-                  <strong className="text-orange-400 block mb-1">
-                    CAPTAIN
-                  </strong>
-                  +3 Points per Sailor card.
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                <Trophy className="text-yellow-500" size={20} /> Ending the
-                Round
-              </h3>
-              <div className="space-y-2">
-                <div className="bg-slate-800 p-3 rounded-lg border-l-4 border-slate-400">
-                  <strong className="text-white block">STOP (Safe)</strong>
-                  <span className="text-slate-400 text-xs">
-                    Round ends immediately. Everyone scores their points.
-                  </span>
-                </div>
-                <div className="bg-slate-800 p-3 rounded-lg border-l-4 border-yellow-500">
-                  <strong className="text-yellow-400 block">
-                    LAST CHANCE (Bet)
-                  </strong>
-                  <span className="text-slate-400 text-xs">
-                    You bet you have the most points. Everyone else gets{" "}
-                    <strong>1 final turn</strong>.
-                  </span>
-                  <div className="text-xs text-slate-500 mt-1">
-                    <em>Relaxed Rule:</em> Even if you have 0 Mermaids, you get
-                    the Color Bonus during Last Chance scoring!
-                  </div>
-                </div>
-              </div>
-            </section>
-          </div>
-        </div>
-      </div>
-
-      <div className="text-center pt-4 border-t border-slate-800 shrink-0">
+  return (
+    <div className="fixed inset-0 z-[200] bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
+      <div className="bg-slate-900 border border-slate-700 w-full max-w-5xl rounded-3xl shadow-2xl p-6 md:p-8 relative my-8 max-h-[90vh] flex flex-col">
         <button
           onClick={onClose}
-          className="bg-cyan-600 hover:bg-cyan-500 text-white px-8 py-3 rounded-full font-bold shadow-lg transition-transform active:scale-95"
+          className="absolute top-4 right-4 p-2 bg-slate-800 rounded-full hover:bg-red-500/20 hover:text-red-400 transition-colors z-10"
         >
-          Got it, Captain!
+          <X size={24} />
         </button>
+
+        <div className="text-center mb-6 shrink-0">
+          <h2 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 tracking-widest uppercase mb-2">
+            Captain's Guide
+          </h2>
+          <p className="text-slate-400 text-sm">
+            Reach <strong>{winPoints} points</strong> to win. 4 Mermaids wins
+            instantly.
+          </p>
+        </div>
+
+        <div className="overflow-y-auto pr-2 custom-scrollbar flex-1">
+          {/* --- SECTION 1: DUOS --- */}
+          <div className="mb-8">
+            <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2">
+              <Sparkles className="text-cyan-500" size={18} />
+              Duos (Action Pairs)
+              <span className="text-xs font-normal text-slate-400 ml-auto">
+                1 Point per pair • Play pair to activate effect
+              </span>
+            </h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              {getCardsByType("DUO").map((card) => (
+                <div
+                  key={card.id}
+                  className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 flex items-start gap-3"
+                >
+                  <CardDisplay cardType={card.id} tiny />
+                  <div>
+                    <div className="font-bold text-slate-200 text-sm flex items-center gap-2">
+                      {card.name}
+                      <span className="text-[10px] bg-black/40 px-1.5 py-0.5 rounded text-slate-500">
+                        {card.count} in deck
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400 leading-relaxed mt-1">
+                      {card.desc}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* --- SECTION 2: COLLECTORS --- */}
+          <div className="mb-8">
+            <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2">
+              <Shell className="text-amber-500" size={18} />
+              Collectors (Sets)
+              <span className="text-xs font-normal text-slate-400 ml-auto">
+                Score increases with quantity
+              </span>
+            </h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              {getCardsByType("COLLECT").map((card) => (
+                <div
+                  key={card.id}
+                  className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 flex items-start gap-3"
+                >
+                  <CardDisplay cardType={card.id} tiny />
+                  <div className="w-full">
+                    <div className="font-bold text-slate-200 text-sm flex items-center gap-2">
+                      {card.name}
+                      <span className="text-[10px] bg-black/40 px-1.5 py-0.5 rounded text-slate-500">
+                        {card.count} in deck
+                      </span>
+                    </div>
+                    <div className="mt-2 bg-black/20 rounded p-2 text-xs font-mono text-cyan-300">
+                      {card.desc}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* --- SECTION 3: MULTIPLIERS --- */}
+          <div className="mb-8">
+            <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2">
+              <Trophy className="text-purple-500" size={18} />
+              Multipliers & Bonuses
+              <span className="text-xs font-normal text-slate-400 ml-auto">
+                Boosts score based on other cards
+              </span>
+            </h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              {getCardsByType("MULTIPLIER").map((card) => (
+                <div
+                  key={card.id}
+                  className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 flex items-start gap-3"
+                >
+                  <CardDisplay cardType={card.id} tiny />
+                  <div>
+                    <div className="font-bold text-slate-200 text-sm flex items-center gap-2">
+                      {card.name}
+                      <span className="text-[10px] bg-black/40 px-1.5 py-0.5 rounded text-slate-500">
+                        {card.count} in deck
+                      </span>
+                    </div>
+                    <p
+                      className={`text-xs leading-relaxed mt-1 ${
+                        card.id === "MERMAID"
+                          ? "text-fuchsia-300 font-bold"
+                          : "text-slate-400"
+                      }`}
+                    >
+                      {card.desc}
+                    </p>
+                    {card.id === "MERMAID" && (
+                      <p className="text-[10px] text-fuchsia-500/80 mt-1 italic">
+                        Win instantly if you collect 4!
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* --- SECTION 4: GAME FLOW --- */}
+          <div>
+            <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2 border-b border-slate-700 pb-2">
+              <Anchor className="text-emerald-500" size={18} />
+              Game Flow
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+              <div className="bg-slate-800 p-4 rounded-xl">
+                <strong className="text-cyan-400 block text-sm mb-1">
+                  1. DRAW
+                </strong>
+                Draw 2, Keep 1 <br /> OR <br /> Take 1 from Discard.
+              </div>
+              <div className="bg-slate-800 p-4 rounded-xl">
+                <strong className="text-purple-400 block text-sm mb-1">
+                  2. PLAY (Optional)
+                </strong>
+                Play Duo pairs to trigger effects. They score points even if you
+                keep them in hand, but effects only happen if played.
+              </div>
+              <div className="bg-slate-800 p-4 rounded-xl">
+                <strong className="text-yellow-400 block text-sm mb-1">
+                  3. END ROUND
+                </strong>
+                Reach {STOP_THRESHOLD} pts to call <strong>STOP</strong> (Safe)
+                or <strong>LAST CHANCE</strong> (Bet).
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center pt-4 border-t border-slate-800 shrink-0 mt-4">
+          <button
+            onClick={onClose}
+            className="bg-cyan-600 hover:bg-cyan-500 text-white px-10 py-3 rounded-full font-bold shadow-lg transition-transform active:scale-95"
+          >
+            Set Sail
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // ---------------------------------------------------------------------------
 // MAIN LOGIC
