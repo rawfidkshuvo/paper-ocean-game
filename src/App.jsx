@@ -1909,7 +1909,7 @@ export default function PaperOceans() {
 
         {/* LOGS DRAWER */}
         {showLogs && (
-          <div className="absolute top-14 right-0 w-64 bg-slate-900/95 border-l border-slate-700 bottom-0 z-[155] overflow-y-auto p-2 backdrop-blur-xl">
+          <div className="fixed top-16 right-4 w-64 max-h-60 bg-gray-900/95 border border-gray-700 rounded-xl z-[155] overflow-y-auto p-2 shadow-2xl">
             <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 sticky top-0 bg-slate-900/95 py-2">
               Captain's Log
             </h4>
