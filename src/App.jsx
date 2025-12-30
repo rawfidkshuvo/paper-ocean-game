@@ -1865,7 +1865,7 @@ export default function PaperOceans() {
         )}
 
         {/* TOP BAR */}
-        <div className="h-14 bg-slate-900/80 border-b border-slate-800 flex items-center justify-between px-4 z-50 backdrop-blur-md shrink-0">
+        <div className="h-14 bg-slate-900/80 border-b border-slate-800 flex items-center justify-between px-4 z-[160] backdrop-blur-md shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-cyan-900/50 rounded flex items-center justify-center">
               <Fish size={18} className="text-cyan-500" />
@@ -1909,7 +1909,7 @@ export default function PaperOceans() {
 
         {/* LOGS DRAWER */}
         {showLogs && (
-          <div className="absolute top-14 right-0 w-64 bg-slate-900/95 border-l border-slate-700 bottom-0 z-[60] overflow-y-auto p-2 backdrop-blur-xl">
+          <div className="absolute top-14 right-0 w-64 bg-slate-900/95 border-l border-slate-700 bottom-0 z-[155] overflow-y-auto p-2 backdrop-blur-xl">
             <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 sticky top-0 bg-slate-900/95 py-2">
               Captain's Log
             </h4>
@@ -2322,7 +2322,7 @@ export default function PaperOceans() {
         {/* WIN / ROUND END SCREEN - SCROLLABLE FIX */}
         {(gameState.status === "finished" ||
           gameState.status === "round_end") && (
-          <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[150] flex flex-col items-center p-4 animate-in fade-in duration-500 overflow-hidden">
+          <div className="fixed inset-0 top-14 bg-slate-950/95 backdrop-blur-xl z-[150] flex flex-col items-center p-4 animate-in fade-in duration-500 overflow-hidden">
             {/* CONTAINER: Max Width + Flex Column for Layout */}
             <div className="w-full max-w-lg h-full max-h-full flex flex-col relative">
               {/* HEADER (Fixed Top) */}
