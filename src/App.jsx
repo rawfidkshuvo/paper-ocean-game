@@ -2545,7 +2545,9 @@ export default function PaperOceans() {
                         : "MARK READY"}
                     </button>
                     <div className="text-slate-400 text-xs font-bold animate-pulse mt-2">
-                      Waiting for next round...
+                      {gameState.status === "finished"
+                        ? "Waiting for host..."
+                        : "Waiting for next round..."}
                     </div>
                   </div>
                 )}
