@@ -416,11 +416,13 @@ const CardDisplay = ({
   highlight,
   small,
   tiny,
+  mini,
   count,
 }) => {
   const card = CARD_TYPES[cardType];
   if (!card) return <div className="w-16 h-24 bg-gray-800 rounded"></div>;
 
+  // Tiny: For opponents and detailed logs (very small)
   if (tiny) {
     return (
       <div
@@ -428,6 +430,18 @@ const CardDisplay = ({
         title={card.name}
       >
         <card.icon size={12} className={card.color} />
+      </div>
+    );
+  }
+
+  // Mini: For Player Tableau (Small card, Icon Only, No Text)
+  if (mini) {
+    return (
+      <div
+        className={`w-12 h-16 rounded-lg flex items-center justify-center ${card.bg} border-2 ${card.border} shadow-md shrink-0 cursor-help transition-transform hover:scale-105`}
+        title={card.name}
+      >
+        <card.icon size={24} className={card.color} />
       </div>
     );
   }
@@ -2227,14 +2241,15 @@ export default function PaperOceans() {
                 </span>
                 <div className="flex-1 overflow-y-auto space-y-1 custom-scrollbar max-h-[180px]">
                   {me.tableau.map((c, i) => (
-                    // Stack cards slightly
+                    // Stack cards slightly - Adjusted negative margin for smaller card size
                     <div
                       key={i}
                       className={`${
-                        i > 0 ? "-mt-16" : ""
+                        i > 0 ? "-mt-12" : ""
                       } transition-all hover:translate-x-2`}
                     >
-                      <CardDisplay cardType={c.type} small />
+                      {/* Changed to use the new 'mini' prop */}
+                      <CardDisplay cardType={c.type} mini />
                     </div>
                   ))}
                   {me.tableau.length === 0 && (
