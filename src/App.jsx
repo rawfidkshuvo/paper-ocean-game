@@ -2013,7 +2013,7 @@ export default function PaperOceans() {
                     {sharkStealMode && p.hand.length > 0 && (
                       <button
                         onClick={() => handleSharkSteal(p.id)}
-                        className="absolute inset-0 bg-red-500/80 rounded-xl z-30 flex flex-col items-center justify-center animate-in zoom-in cursor-pointer hover:bg-red-600/90 transition-colors backdrop-blur-sm"
+                        className="absolute inset-0 bg-red-500/50 rounded-xl z-30 flex flex-col items-center justify-center animate-in zoom-in cursor-pointer hover:bg-red-600/90 transition-colors backdrop-blur-sm"
                       >
                         <Sword size={24} className="text-white mb-1" />
                         <span className="font-black text-white text-sm uppercase tracking-widest drop-shadow-md">
