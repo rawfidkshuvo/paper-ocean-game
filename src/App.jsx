@@ -434,14 +434,14 @@ const CardDisplay = ({
     );
   }
 
-  // Mini: For Player Tableau (Small card, Icon Only, No Text)
+  // Mini: For Player Tableau (Small card, Icon Only, No Text, Fit 2 across)
   if (mini) {
     return (
       <div
-        className={`w-12 h-16 rounded-lg flex items-center justify-center ${card.bg} border-2 ${card.border} shadow-md shrink-0 cursor-help transition-transform hover:scale-105`}
+        className={`w-10 h-14 rounded-lg flex items-center justify-center ${card.bg} border-2 ${card.border} shadow-md shrink-0 cursor-help transition-transform hover:scale-105`}
         title={card.name}
       >
-        <card.icon size={24} className={card.color} />
+        <card.icon size={20} className={card.color} />
       </div>
     );
   }
@@ -2235,23 +2235,16 @@ export default function PaperOceans() {
             {/* CARD AREA */}
             <div className="flex gap-4 h-auto min-h-[140px] items-stretch">
               {/* My Tableau (Left) */}
-              <div className="w-24 flex-none flex flex-col gap-1 border-r border-slate-800 pr-2">
+              <div className="w-28 flex-none flex flex-col gap-1 border-r border-slate-800 pr-2">
                 <span className="text-[10px] text-slate-500 uppercase font-bold text-center flex-none">
                   Tableau
                 </span>
-                <div className="flex-1 overflow-y-auto space-y-1 custom-scrollbar max-h-[180px]">
-                  {me.tableau.map((c, i) => (
-                    // Stack cards slightly - Adjusted negative margin for smaller card size
-                    <div
-                      key={i}
-                      className={`${
-                        i > 0 ? "-mt-12" : ""
-                      } transition-all hover:translate-x-2`}
-                    >
-                      {/* Changed to use the new 'mini' prop */}
-                      <CardDisplay cardType={c.type} mini />
-                    </div>
-                  ))}
+                <div className="flex-1 overflow-y-auto custom-scrollbar max-h-[180px] p-1">
+                  <div className="grid grid-cols-2 gap-2">
+                    {me.tableau.map((c, i) => (
+                      <CardDisplay key={i} cardType={c.type} mini />
+                    ))}
+                  </div>
                   {me.tableau.length === 0 && (
                     <div className="h-full flex items-center justify-center text-[10px] text-slate-700 text-center">
                       No Pairs
