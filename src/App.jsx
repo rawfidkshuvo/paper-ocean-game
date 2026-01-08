@@ -1512,7 +1512,7 @@ export default function PaperOceans() {
     if (bettorWon) {
       // SCENARIO: BETTOR WINS
       // Bettor: Standard Score + 5 Bonus (No Pity Points)
-      bettor.score += bettorPoints + 5;
+      bettor.score += bettorPoints + getColorBonusOnly(bettor);
 
       players.forEach((p) => {
         if (p.id !== bettorId) {
