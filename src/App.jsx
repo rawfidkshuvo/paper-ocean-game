@@ -2410,7 +2410,7 @@ export default function PaperOceans() {
                         const isBettor = p.id === bettingId;
 
                         if (bettorWon) {
-                          if (isBettor) return bettorStrength;
+                          if (isBettor) return bettorStrength + getColorBonus(p);
                           return getColorBonus(p);
                         } else {
                           if (isBettor) return getColorBonus(p);
