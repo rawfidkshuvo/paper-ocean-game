@@ -376,6 +376,15 @@ const GameLogo = () => (
   </div>
 );
 
+const GameLogoBig = () => (
+  <div className="flex items-center justify-center gap-2 opacity-40 mt-auto pb-4 pt-2 relative z-10 pointer-events-none select-none">
+    <Origami size={20} className="text-cyan-500" />
+    <span className="text-[20px] font-black tracking-[0.2em] text-cyan-500 uppercase">
+      PAPER OCEANS
+    </span>
+  </div>
+);
+
 const FeedbackOverlay = ({ type, message, subtext, icon: Icon }) => (
   <div className="fixed inset-0 z-[160] flex items-center justify-center pointer-events-none animate-in fade-in zoom-in duration-300">
     <div
@@ -1662,7 +1671,7 @@ export default function PaperOceans() {
             onClick={() => setShowGuide(true)}
             className="w-full mt-4 text-slate-400 hover:text-cyan-400 text-sm font-bold flex items-center justify-center gap-2 transition-colors py-2"
           >
-            <BookOpen size={16} /> How to Play
+            <BookOpen size={16} /> Captains Guide Book
           </button>
         </div>
         <div className="absolute bottom-4 text-slate-600 text-xs text-center">
@@ -1715,7 +1724,7 @@ export default function PaperOceans() {
     return (
       <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-6 relative">
         <FloatingBackground />
-
+        <GameLogoBig />
         {/* GUIDE MODAL */}
         {showGuide && (
           <HowToPlayModal
@@ -1882,11 +1891,11 @@ export default function PaperOceans() {
         <div className="h-14 bg-slate-900/80 border-b border-slate-800 flex items-center justify-between px-4 z-[160] backdrop-blur-md shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-cyan-900/50 rounded flex items-center justify-center">
-              <Fish size={18} className="text-cyan-500" />
+              <Origami size={18} className="text-cyan-500" />
             </div>
             <div className="flex flex-col">
               <span className="font-bold tracking-wider text-cyan-100 text-sm leading-none">
-                ROOM: {gameState.roomId}
+                THE VOYAGE
               </span>
               <span className="text-[10px] text-cyan-500 font-mono">
                 ROUND {gameState.round}
@@ -2410,7 +2419,8 @@ export default function PaperOceans() {
                         const isBettor = p.id === bettingId;
 
                         if (bettorWon) {
-                          if (isBettor) return bettorStrength + getColorBonus(p);
+                          if (isBettor)
+                            return bettorStrength + getColorBonus(p);
                           return getColorBonus(p);
                         } else {
                           if (isBettor) return getColorBonus(p);
