@@ -378,7 +378,7 @@ const GameLogo = () => (
 
 const GameLogoBig = () => (
   <div className="flex items-center justify-center gap-2 opacity-40 mt-auto pb-4 pt-2 relative z-10 pointer-events-none select-none">
-    <Origami size={20} className="text-cyan-500" />
+    <Origami size={22} className="text-cyan-500" />
     <span className="text-[20px] font-black tracking-[0.2em] text-cyan-500 uppercase">
       PAPER OCEANS
     </span>
