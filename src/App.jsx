@@ -1930,6 +1930,40 @@ export default function PaperOceans() {
           </div>
         </div>
 
+        {/* NEW: PERSISTENT LAST CHANCE BANNER                 */}
+        {/* -------------------------------------------------- */}
+        {gameState.status === "last_chance" && (
+          <div className="w-full bg-gradient-to-r from-amber-900/90 via-orange-900/90 to-amber-900/90 border-b-4 border-amber-500 p-2 z-[155] shrink-0 shadow-xl flex flex-col items-center justify-center animate-in slide-in-from-top-4 duration-500">
+            <div className="flex items-center gap-3 animate-pulse">
+              <AlertTriangle
+                className="text-amber-400"
+                size={24}
+                fill="currentColor"
+                fillOpacity={0.2}
+              />
+              <span className="text-amber-100 font-black tracking-[0.15em] uppercase text-sm md:text-xl drop-shadow-md">
+                LAST CHANCE CALLED BY{" "}
+                <span className="text-white underline decoration-amber-500 underline-offset-4">
+                  {
+                    gameState.players.find(
+                      (p) => p.id === gameState.bettingPlayerId
+                    )?.name
+                  }
+                </span>
+              </span>
+              <AlertTriangle
+                className="text-amber-400"
+                size={24}
+                fill="currentColor"
+                fillOpacity={0.2}
+              />
+            </div>
+            <div className="text-[10px] md:text-xs text-amber-200/80 font-bold mt-1 uppercase tracking-widest">
+              Final Turn • Beat their score or lose points!
+            </div>
+          </div>
+        )}
+
         {/* LOGS DRAWER */}
         {showLogs && (
           <div className="fixed top-16 right-4 w-64 max-h-60 bg-gray-900/95 border border-gray-700 rounded-xl z-[155] overflow-y-auto p-2 shadow-2xl">
