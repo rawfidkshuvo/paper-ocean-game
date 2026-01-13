@@ -2163,7 +2163,7 @@ export default function PaperOceans() {
             <div className="absolute top-0 w-full text-center pointer-events-none p-2">
               {!isMyTurn && gameState.status === "playing" && (
                 <div className="inline-block bg-slate-900/80 px-4 py-1 rounded-full text-slate-400 text-sm border border-slate-700 backdrop-blur-sm">
-                  Waiting for {gameState.players[gameState.turnIndex].name}...
+                  Waiting for {gameState.players[gameState.turnIndex]?.name || "Player"}...
                 </div>
               )}
             </div>
