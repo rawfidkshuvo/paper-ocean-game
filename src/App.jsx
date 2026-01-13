@@ -1284,12 +1284,7 @@ export default function PaperOceans() {
     const card2 = me.hand[selectedHandIndices[1]];
 
     if (card1.type !== card2.type || CARD_TYPES[card1.type].type !== "DUO") {
-      triggerFeedback(
-        "failure",
-        "INVALID DUO",
-        "Must pick 2 matching Duo cards.",
-        AlertTriangle
-      );
+      triggerFeedback("failure", "INVALID DUO", "Must pick 2 matching Duo cards.", AlertTriangle);
       setSelectedHandIndices([]);
       return;
     }
@@ -1300,60 +1295,41 @@ export default function PaperOceans() {
     me.tableau.push(card1, card2);
 
     let nextState = "ACTION_PHASE";
-    let logs = [
-      {
-        text: `${me.name} played a pair of ${CARD_TYPES[card1.type].name}s!`,
-        type: "success",
-        id: Date.now(),
-      },
-    ];
+    let logText = `${me.name} played a pair of ${CARD_TYPES[card1.type].name}s!`;
 
-    if (card1.type === "BOAT") {
-      nextState = "DRAW";
-      logs.push({
-        text: "Effect: Extra Turn! Draw again.",
-        type: "success",
-        id: Date.now() + 1,
-      });
+    // TRIGGER LOCAL UI MODALS FIRST
+    if (card1.type === "CRAB") {
+      if (gameState.discardPile.length > 0) {
+        setDiscardSearchMode(true); // Open the Modal
+      }
+    } else if (card1.type === "SHARK") {
+      const hasOpponentWithCards = players.some((p, i) => i !== pIdx && p.hand.length > 0);
+      if (hasOpponentWithCards) {
+        setSharkStealMode(true); // Show "STEAL" buttons on opponents
+      }
+    } else if (card1.type === "BOAT") {
+      nextState = "DRAW"; // Grant extra turn
     } else if (card1.type === "FISH") {
       const deck = [...gameState.deck];
       if (deck.length > 0) {
-        const c = deck.pop();
-        me.hand.push(c);
-        logs.push({
-          text: `Effect: Drew a card from deck.`,
-          type: "neutral",
-          id: Date.now() + 1,
-        });
-      }
-    } else if (card1.type === "CRAB") {
-      if (gameState.discardPile.length > 0) {
-        setDiscardSearchMode(true);
-      }
-    } else if (card1.type === "SHARK") {
-      const opponentHasCards = players.some(
-        (p, i) => i !== pIdx && p.hand.length > 0
-      );
-      if (opponentHasCards) {
-        setSharkStealMode(true);
-      } else {
-        logs.push({
-          text: "No one to steal from!",
-          type: "neutral",
-          id: Date.now() + 1,
-        });
+        me.hand.push(deck.pop());
       }
     }
 
-    setSelectedHandIndices([]);
+    setSelectedHandIndices([]); // Clear selection
 
+    // Update Firebase
     await updateDoc(
       doc(db, "artifacts", APP_ID, "public", "data", "rooms", roomId),
       {
         players,
         turnState: nextState,
-        logs: arrayUnion(...logs),
         deck: gameState.deck,
+        logs: arrayUnion({
+          text: logText,
+          type: "success",
+          id: Date.now(),
+        }),
       }
     );
   };
@@ -1997,7 +1973,7 @@ export default function PaperOceans() {
         {/* MAIN AREA */}
         <div className="flex-1 flex flex-col relative z-10 overflow-hidden h-full">
           {/* 1. OPPONENTS AREA (Restricted to max 33% height, scrollable) */}
-          <div className="flex-none max-h-[33vh] overflow-y-auto custom-scrollbar p-2 border-b border-white/5 bg-slate-900/20">
+          <div className="flex-none max-h-[35vh] overflow-visible p-2 border-b border-white/5 bg-slate-900/20">
             <div className="grid grid-cols-3 gap-2 items-start">
               {gameState.players.map((p, i) => {
                 if (p.id === user.uid) return null;
@@ -2343,29 +2319,38 @@ export default function PaperOceans() {
 
         {/* MODALS */}
 
-        {/* Discard Search (Crab) */}
+        {/* CRAB MODAL - SALVAGE FROM DISCARD */}
         {discardSearchMode && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in">
-            <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-3xl p-6 shadow-2xl">
-              <h3 className="text-2xl font-black text-white mb-6 flex items-center gap-3">
-                <Scissors className="text-red-400" /> Salvage from Discard
-              </h3>
-              <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3 max-h-[60vh] overflow-y-auto p-2 bg-black/20 rounded-xl mb-4">
+          <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[300] flex items-center justify-center p-4 animate-in fade-in zoom-in duration-200">
+            <div className="bg-slate-900 border-2 border-red-500/50 rounded-3xl w-full max-w-2xl p-6 shadow-[0_0_50px_rgba(239,68,68,0.2)]">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-black text-white flex items-center gap-3">
+                  <Scissors className="text-red-400 animate-pulse" /> 
+                  SALVAGE DISCARD
+                </h3>
+                <button 
+                  onClick={() => setDiscardSearchMode(false)}
+                  className="p-2 hover:bg-slate-800 rounded-full text-slate-400"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 max-h-[50vh] overflow-y-auto p-4 bg-black/40 rounded-2xl mb-6 custom-scrollbar">
                 {gameState.discardPile.map((c, i) => (
-                  <CardDisplay
-                    key={i}
-                    cardType={c.type}
-                    onClick={() => handleCrabPick(c)}
-                    small
-                  />
+                  <div key={`${c.id}-${i}`} className="flex flex-col items-center gap-2">
+                    <CardDisplay
+                      cardType={c.type}
+                      onClick={() => handleCrabPick(c)}
+                      small
+                    />
+                  </div>
                 ))}
               </div>
-              <button
-                onClick={() => setDiscardSearchMode(false)}
-                className="w-full bg-slate-800 hover:bg-slate-700 py-4 rounded-xl text-slate-300 font-bold transition-colors"
-              >
-                Cancel
-              </button>
+              
+              <p className="text-center text-slate-400 text-sm font-bold animate-pulse">
+                Select 1 card to add to your hand
+              </p>
             </div>
           </div>
         )}
