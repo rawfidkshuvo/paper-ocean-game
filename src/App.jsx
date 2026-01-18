@@ -849,17 +849,17 @@ export default function PaperOceans() {
 
     if (text.includes("played a pair")) {
       isImportant = true;
-      title = "PAIR PLAYED!";
+      title = "TAKE TOP CARD!";
       sub = text;
       Icon = Sparkles;
       if (text.includes("Shark")) {
-        title = "SHARK ATTACK!";
+        title = "STEAL FROM OPPONENT!";
         Icon = Sword;
       } else if (text.includes("Crab")) {
-        title = "SCAVENGER!";
+        title = "TAKE FROM DISCARD PILE!";
         Icon = Scissors;
       } else if (text.includes("Boat")) {
-        title = "FULL SPEED AHEAD!";
+        title = "TAKE ANOTHER TURN!";
         Icon = Ship;
       }
     } else if (text.includes("Stole")) {
