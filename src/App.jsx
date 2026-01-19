@@ -61,17 +61,17 @@ import {
 
 // Uses environment variables for Firebase Config in Canvas
 const firebaseConfig = {
-  apiKey: "AIzaSyBjIjK53vVJW1y5RaqEFGSFp0ECVDBEe1o",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "game-hub-ff8aa.firebaseapp.com",
-  projectId: "game-hub-ff8aa",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: "game-hub-ff8aa.firebasestorage.app",
   messagingSenderId: "586559578902",
-  appId: "1:586559578902:web:c0d92602ad20ed876aa637",
+  appId: "1:586559578902:web:c0d92602ad20ed876aa637"
 };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const APP_ID = typeof __app_id !== "undefined" ? __app_id : "paper-oceans";
+const APP_ID = typeof __app_id !== "undefined" ? __app_id : "paper-oceans-game";
 
 const STOP_THRESHOLD = 7;
 
