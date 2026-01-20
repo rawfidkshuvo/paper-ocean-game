@@ -1461,25 +1461,27 @@ export default function PaperOceans() {
     const bettorId = gameState.bettingPlayerId;
     const bettor = players.find((p) => p.id === bettorId);
 
-    // FIXED: Calculate Hand Strength using STRICT rules (isLastChance = false).
-    // The "Relaxed" rule is for losers only, so it shouldn't help you win the bet.
-    const bettorPoints = calculatePoints(bettor.hand, bettor.tableau, false);
+    // 1. Calculate Standard Scores (Strength) using global function
+    // NOTE: 'calculatePoints' handles the Mermaid Multiplication logic.
+    // We pass 'false' to ensure we get the strict score (Normal Score).
+    const bettorStrength = calculatePoints(bettor.hand, bettor.tableau, false);
 
     let bettorWon = true;
 
     players.forEach((p) => {
       if (p.id !== bettorId) {
-        // FIXED: Opponents compete with STRICT score.
-        const pts = calculatePoints(p.hand, p.tableau, false);
-        if (pts >= bettorPoints) bettorWon = false;
+        // Opponent Normal Score (includes Mermaid Multiplier)
+        const oppStrength = calculatePoints(p.hand, p.tableau, false);
+        
+        // If opponent ties or exceeds bettor, bettor loses
+        if (oppStrength >= bettorStrength) bettorWon = false;
       }
     });
 
-    // Helper: Calculates Color Bonus with the "Relaxed/Pity" rule built-in.
-    // Used specifically for the losers of the round.
-    const getColorBonusOnly = (p) => {
+    // 2. Helper: Special Color Bonus (SCB)
+    // This is the NEW logic: Highest color count ONLY. No multiplication.
+    const getSpecialColorBonus = (p) => {
       const all = [...p.hand, ...p.tableau];
-      const mermaids = all.filter((c) => c.type === "MERMAID").length;
       const colorCounts = {};
       all.forEach((c) => {
         const def = CARD_TYPES[c.type];
@@ -1487,38 +1489,36 @@ export default function PaperOceans() {
         if (color && color !== "MULTI")
           colorCounts[color] = (colorCounts[color] || 0) + 1;
       });
-      const max = Math.max(0, ...Object.values(colorCounts));
-
-      // If mermaids exist, multiply. If 0 mermaids, return just the count (Pity Rule).
-      if (mermaids > 0) return mermaids * max;
-      return max;
+      return Math.max(0, ...Object.values(colorCounts));
     };
 
+    // 3. Apply Scoring Rules
     if (bettorWon) {
       // SCENARIO: BETTOR WINS
-      // Bettor: Standard Score + 5 Bonus (No Pity Points)
-      bettor.score += bettorPoints + getColorBonusOnly(bettor);
+      // Bettor gets: Normal Score (w/ Mermaids) + SCB (Flat)
+      bettor.score += bettorStrength + getSpecialColorBonus(bettor);
 
       players.forEach((p) => {
         if (p.id !== bettorId) {
-          // Opponents (Losers): Get Pity Color Bonus
-          p.score += getColorBonusOnly(p);
+          // Opponents (Losers) get: SCB only
+          p.score += getSpecialColorBonus(p);
         }
       });
     } else {
       // SCENARIO: BETTOR LOSES
-      // Bettor (Loser): Gets Pity Color Bonus
-      bettor.score += getColorBonusOnly(bettor);
+      // Bettor (Loser) gets: SCB only
+      bettor.score += getSpecialColorBonus(bettor);
 
       players.forEach((p) => {
         if (p.id !== bettorId) {
-          // Opponents (Winners): Standard Score (No Pity Points)
+          // Opponents (Winners) get: Normal Score (w/ Mermaids)
           p.score += calculatePoints(p.hand, p.tableau, false);
         }
       });
     }
 
     players.forEach((p) => (p.ready = p.id === gameState.hostId));
+
     await updateDoc(
       doc(db, "artifacts", APP_ID, "public", "data", "rooms", roomId),
       {
@@ -1526,8 +1526,8 @@ export default function PaperOceans() {
         players,
         logs: arrayUnion({
           text: bettorWon
-            ? `Bet Succeeded! ${bettor.name} gets bonus.`
-            : `Bet Failed! ${bettor.name} gets minimum.`,
+            ? `Bet Succeeded! ${bettor.name} gets Bonus.`
+            : `Bet Failed! ${bettor.name} pays the price.`,
           type: bettorWon ? "success" : "failure",
           id: Date.now(),
         }),
@@ -2386,64 +2386,54 @@ export default function PaperOceans() {
                     .sort((a, b) => b.score - a.score)
                     .map((p, i) => {
                       // --- SCORE CALCULATION LOGIC ---
+                      // --- SCORE CALCULATION LOGIC FOR UI ---
                       const getRoundPoints = () => {
                         const allPlayers = gameState.players;
                         const bettingId = gameState.bettingPlayerId;
 
-                        const getColorBonus = (targetP) => {
+                        // Helper: SCB (Flat Color Count, No Multiplier)
+                        const getSCB = (targetP) => {
                           const all = [...targetP.hand, ...targetP.tableau];
-                          const mermaids = all.filter(
-                            (c) => c.type === "MERMAID"
-                          ).length;
                           const colorCounts = {};
                           all.forEach((c) => {
                             const def = CARD_TYPES[c.type];
                             const color = def ? def.cardColor : null;
-                            if (color && color !== "MULTI")
-                              colorCounts[color] =
-                                (colorCounts[color] || 0) + 1;
+                            if (color && color !== "MULTI") {
+                              colorCounts[color] = (colorCounts[color] || 0) + 1;
+                            }
                           });
-                          const max = Math.max(
-                            0,
-                            ...Object.values(colorCounts)
-                          );
-                          return mermaids > 0 ? mermaids * max : max;
+                          return Math.max(0, ...Object.values(colorCounts));
                         };
 
+                        // 1. Normal Stop (No Bet active)
                         if (!bettingId) {
                           return calculatePoints(p.hand, p.tableau);
                         }
 
-                        const bettor = allPlayers.find(
-                          (pl) => pl.id === bettingId
-                        );
-                        const bettorStrength = calculatePoints(
-                          bettor.hand,
-                          bettor.tableau,
-                          false
-                        );
+                        // 2. Last Chance Scoring Display
+                        const bettor = allPlayers.find((pl) => pl.id === bettingId);
+                        
+                        // Calculate Strengths (Normal Scores with Mermaid Mult)
+                        const bettorStrength = calculatePoints(bettor.hand, bettor.tableau, false);
+                        
                         let bettorWon = true;
                         allPlayers.forEach((opp) => {
                           if (opp.id !== bettingId) {
-                            const oppStrength = calculatePoints(
-                              opp.hand,
-                              opp.tableau,
-                              false
-                            );
-                            if (oppStrength >= bettorStrength)
-                              bettorWon = false;
+                            const oppStrength = calculatePoints(opp.hand, opp.tableau, false);
+                            if (oppStrength >= bettorStrength) bettorWon = false;
                           }
                         });
 
                         const isBettor = p.id === bettingId;
 
                         if (bettorWon) {
-                          if (isBettor)
-                            return bettorStrength + getColorBonus(p);
-                          return getColorBonus(p);
+                          // Bettor Wins:
+                          if (isBettor) return bettorStrength + getSCB(p); // Normal + SCB
+                          return getSCB(p); // Opponent gets SCB only
                         } else {
-                          if (isBettor) return getColorBonus(p);
-                          return calculatePoints(p.hand, p.tableau, false);
+                          // Bettor Loses:
+                          if (isBettor) return getSCB(p); // Bettor gets SCB only
+                          return calculatePoints(p.hand, p.tableau, false); // Opponent gets Normal
                         }
                       };
 
