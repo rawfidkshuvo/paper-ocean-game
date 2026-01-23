@@ -724,7 +724,7 @@ export default function PaperOceans() {
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u);
       if (u) {
-        const savedName = localStorage.getItem("paper_oceans_name");
+        const savedName = localStorage.getItem("gameHub_playerName");
         if (savedName) setPlayerName(savedName);
       }
     });
@@ -913,7 +913,7 @@ export default function PaperOceans() {
 
   const createRoom = async () => {
     if (!playerName) return setError("Enter Name.");
-    localStorage.setItem("paper_oceans_name", playerName);
+    localStorage.setItem("gameHub_playerName", playerName);
     setLoading(true);
 
     const newId = Math.random().toString(36).substring(2, 7).toUpperCase();
@@ -959,7 +959,7 @@ export default function PaperOceans() {
 
   const joinRoom = async () => {
     if (!roomCode || !playerName) return setError("Input credentials.");
-    localStorage.setItem("paper_oceans_name", playerName);
+    localStorage.setItem("gameHub_playerName", playerName);
     setLoading(true);
 
     const code = roomCode.toUpperCase().trim();
