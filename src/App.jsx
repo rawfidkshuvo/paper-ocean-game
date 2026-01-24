@@ -1610,7 +1610,7 @@ export default function PaperOceans() {
 
   if (view === "menu") {
     return (
-      <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans select-none">
+      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans select-none">
         <FloatingBackground />
 
         {/* GUIDE MODAL */}
@@ -1735,7 +1735,7 @@ export default function PaperOceans() {
     // ------------------------------------------
 
     return (
-      <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-6 relative">
+      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 relative">
         <FloatingBackground />
         <GameLogoBig />
         {/* GUIDE MODAL */}
