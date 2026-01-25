@@ -366,7 +366,7 @@ const FloatingBackground = ({ isShaking }) => (
       isShaking ? "animate-shake bg-red-900/20" : ""
     }`}
   >
-    <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-yellow-900/20 via-gray-950 to-black" />
+    <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-yellow-900/20 via-gray-950 to-black" />
     <div className="absolute top-0 left-0 w-full h-full opacity-10">
       {[...Array(20)].map((_, i) => {
         const fruitKeys = Object.keys(CARD_TYPES);
@@ -423,7 +423,7 @@ const GameLogoBig = () => (
 );
 
 const FeedbackOverlay = ({ type, message, subtext, icon: Icon }) => (
-  <div className="fixed inset-0 z-[160] flex items-center justify-center pointer-events-none animate-in fade-in zoom-in duration-300">
+  <div className="fixed inset-0 z-160 flex items-center justify-center pointer-events-none animate-in fade-in zoom-in duration-300">
     <div
       className={`
       flex flex-col items-center justify-center p-8 md:p-12 rounded-3xl border-4 shadow-2xl backdrop-blur-xl max-w-sm md:max-w-xl mx-4 text-center
@@ -550,7 +550,7 @@ const HowToPlayModal = ({ onClose, winPoints }) => {
     Object.values(CARD_TYPES).filter((c) => c.type === type);
 
   return (
-    <div className="fixed inset-0 z-[200] bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-200 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
       <div className="bg-slate-900 border border-slate-700 w-full max-w-5xl rounded-3xl shadow-2xl p-6 md:p-8 relative my-8 max-h-[90vh] flex flex-col">
         <button
           onClick={onClose}
@@ -560,7 +560,7 @@ const HowToPlayModal = ({ onClose, winPoints }) => {
         </button>
 
         <div className="text-center mb-6 shrink-0">
-          <h2 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 tracking-widest uppercase mb-2">
+          <h2 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-blue-500 tracking-widest uppercase mb-2">
             Captain's Guide
           </h2>
           <p className="text-slate-400 text-sm">
@@ -1626,7 +1626,7 @@ export default function PaperOceans() {
             size={64}
             className="text-cyan-400 mx-auto mb-4 animate-bounce"
           />
-          <h1 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-cyan-400 to-blue-600 tracking-widest drop-shadow-md">
+          <h1 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-linear-to-b from-cyan-400 to-blue-600 tracking-widest drop-shadow-md">
             PAPER OCEANS
           </h1>
           <p className="text-white-400/60 tracking-[0.3em] uppercase mt-2">
@@ -1657,7 +1657,7 @@ export default function PaperOceans() {
               <button
                 onClick={createRoom}
                 disabled={loading}
-                className="bg-gradient-to-br from-cyan-600 to-blue-700 hover:from-cyan-500 hover:to-blue-600 p-4 rounded-xl font-bold flex flex-col items-center justify-center gap-1 transition-all active:scale-95 shadow-lg shadow-cyan-900/50"
+                className="bg-linear-to-br from-cyan-600 to-blue-700 hover:from-cyan-500 hover:to-blue-600 p-4 rounded-xl font-bold flex flex-col items-center justify-center gap-1 transition-all active:scale-95 shadow-lg shadow-cyan-900/50"
               >
                 <Anchor size={24} />
                 <span>New Voyage</span>
@@ -1791,7 +1791,7 @@ export default function PaperOceans() {
                 className="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-slate-700"
               >
                 <span className="font-bold flex items-center gap-3 text-lg">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-xs font-black">
+                  <div className="w-8 h-8 rounded-full bg-linear-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-xs font-black">
                     {p.name.charAt(0)}
                   </div>
                   {p.name}
@@ -1829,7 +1829,7 @@ export default function PaperOceans() {
             <button
               onClick={() => startRound(false)}
               disabled={gameState.players.length < 2}
-              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 py-4 rounded-xl font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-900/50 transition-all active:scale-95 flex items-center justify-center gap-2"
+              className="w-full bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 py-4 rounded-xl font-bold text-xl disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-900/50 transition-all active:scale-95 flex items-center justify-center gap-2"
             >
               {gameState.players.length < 2 ? (
                 "Waiting for Crew..."
@@ -1901,7 +1901,7 @@ export default function PaperOceans() {
         )}
 
         {/* TOP BAR */}
-        <div className="h-14 bg-slate-900/80 border-b border-slate-800 flex items-center justify-between px-4 z-[160] backdrop-blur-md shrink-0">
+        <div className="h-14 bg-slate-900/80 border-b border-slate-800 flex items-center justify-between px-4 z-160 backdrop-blur-md shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-cyan-900/50 rounded flex items-center justify-center">
               <Origami size={18} className="text-cyan-500" />
@@ -1946,7 +1946,7 @@ export default function PaperOceans() {
         {/* NEW: PERSISTENT LAST CHANCE BANNER                 */}
         {/* -------------------------------------------------- */}
         {gameState.status === "last_chance" && (
-          <div className="w-full bg-gradient-to-r from-amber-900/90 via-orange-900/90 to-amber-900/90 border-b-4 border-amber-500 p-2 z-[155] shrink-0 shadow-xl flex flex-col items-center justify-center animate-in slide-in-from-top-4 duration-500">
+          <div className="w-full bg-linear-to-r from-amber-900/90 via-orange-900/90 to-amber-900/90 border-b-4 border-amber-500 p-2 z-155 shrink-0 shadow-xl flex flex-col items-center justify-center animate-in slide-in-from-top-4 duration-500">
             <div className="flex items-center gap-3 animate-pulse">
               <AlertTriangle
                 className="text-amber-400"
@@ -1979,7 +1979,7 @@ export default function PaperOceans() {
 
         {/* LOGS DRAWER */}
         {showLogs && (
-          <div className="fixed top-16 right-4 w-64 max-h-60 bg-gray-900/95 border border-gray-700 rounded-xl z-[155] overflow-y-auto p-2 shadow-2xl">
+          <div className="fixed top-16 right-4 w-64 max-h-60 bg-gray-900/95 border border-gray-700 rounded-xl z-155 overflow-y-auto p-2 shadow-2xl">
             <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 sticky top-0 bg-slate-900/95 py-2">
               Captain's Log
             </h4>
@@ -2238,7 +2238,7 @@ export default function PaperOceans() {
                   gameState.turnState === "ACTION_PHASE" && (
                     <button
                       onClick={handlePlayDuo}
-                      className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg animate-in slide-in-from-bottom-2 hover:scale-105 transition-all flex items-center gap-2"
+                      className="bg-linear-to-r from-purple-600 to-indigo-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg animate-in slide-in-from-bottom-2 hover:scale-105 transition-all flex items-center gap-2"
                     >
                       <Sparkles size={16} /> Play Pair
                     </button>
@@ -2279,7 +2279,7 @@ export default function PaperOceans() {
                     </button>
                     <button
                       onClick={handleLastChance}
-                      className="bg-gradient-to-r from-amber-500 to-orange-600 hover:brightness-110 text-white px-4 py-2 rounded-lg font-black shadow-lg animate-pulse transition-all active:scale-95 border-2 border-white/20"
+                      className="bg-linear-to-r from-amber-500 to-orange-600 hover:brightness-110 text-white px-4 py-2 rounded-lg font-black shadow-lg animate-pulse transition-all active:scale-95 border-2 border-white/20"
                     >
                       LAST CHANCE
                     </button>
@@ -2358,7 +2358,7 @@ export default function PaperOceans() {
 
         {/* CRAB MODAL - SALVAGE FROM DISCARD */}
         {discardSearchMode && (
-          <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[300] flex items-center justify-center p-4 animate-in fade-in zoom-in duration-200">
+          <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-300 flex items-center justify-center p-4 animate-in fade-in zoom-in duration-200">
             <div className="bg-slate-900 border-2 border-red-500/50 rounded-3xl w-full max-w-2xl p-6 shadow-[0_0_50px_rgba(239,68,68,0.2)]">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-black text-white flex items-center gap-3">
@@ -2395,7 +2395,7 @@ export default function PaperOceans() {
         {/* WIN / ROUND END SCREEN - SCROLLABLE FIX */}
         {(gameState.status === "finished" ||
           gameState.status === "round_end") && (
-          <div className="fixed inset-0 top-14 bg-slate-950/95 backdrop-blur-xl z-[150] flex flex-col items-center p-4 animate-in fade-in duration-500 overflow-hidden">
+          <div className="fixed inset-0 top-14 bg-slate-950/95 backdrop-blur-xl z-150 flex flex-col items-center p-4 animate-in fade-in duration-500 overflow-hidden">
             {/* CONTAINER: Max Width + Flex Column for Layout */}
             <div className="w-full max-w-lg h-full max-h-full flex flex-col relative">
               {/* HEADER (Fixed Top) */}
@@ -2621,7 +2621,7 @@ export default function PaperOceans() {
         )}
 
         {showLeaveConfirm && (
-          <div className="fixed inset-0 z-[200] bg-black/80 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-200 bg-black/80 flex items-center justify-center p-4">
             <div className="bg-slate-900 border border-slate-700 p-6 rounded-xl max-w-xs w-full text-center">
               <h3 className="text-xl font-bold text-white mb-2">
                 Abandon Ship?
