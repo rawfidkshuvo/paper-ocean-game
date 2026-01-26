@@ -970,6 +970,11 @@ export default function PaperOceans() {
     }
   }, [gameState?.feedbackTrigger, user?.uid]);
 
+  const triggerFeedback = (type, msg, sub, icon) => {
+    setFeedback({ type, message: msg, subtext: sub, icon });
+    setTimeout(() => setFeedback(null), 2500);
+  };
+
   // --- ACTIONS ---
 
   const createRoom = async () => {
