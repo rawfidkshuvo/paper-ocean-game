@@ -2407,7 +2407,7 @@ export default function PaperOceans() {
 
         {/* CRAB MODAL - SALVAGE FROM DISCARD */}
         {discardSearchMode && (
-          <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-300 flex items-center justify-center p-4 animate-in fade-in zoom-in duration-200">
+          <div className="fixed inset-0 bg-slate-950/90 backdrop-grayscale z-300 flex items-center justify-center p-4 animate-in fade-in zoom-in duration-200">
             <div className="bg-slate-900 border-2 border-red-500/50 rounded-3xl w-full max-w-2xl p-6 shadow-[0_0_50px_rgba(239,68,68,0.2)]">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-black text-white flex items-center gap-3">
