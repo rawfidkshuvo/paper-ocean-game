@@ -858,27 +858,32 @@ export default function PaperOceans() {
   ]);
 
   // --- GLOBAL ALERT SYSTEM ---
+  // --- GLOBAL ALERT SYSTEM ---
   useEffect(() => {
     if (!roomId) {
       lastLogIdRef.current = null;
     }
   }, [roomId]);
 
+  // 1. Handle Standard Logs (Existing logic, slightly modified)
   useEffect(() => {
     if (!gameState?.logs || gameState.logs.length === 0) return;
-
     const latestLog = gameState.logs[gameState.logs.length - 1];
 
     if (lastLogIdRef.current === null) {
       lastLogIdRef.current = latestLog.id;
       return;
     }
-
     if (latestLog.id <= lastLogIdRef.current) return;
-
     lastLogIdRef.current = latestLog.id;
 
     const text = latestLog.text;
+    
+    // Skip the generic "stole a card" log here, because we handle it in the 
+    // specific feedbackTrigger useEffect below for better detail.
+    if (text.includes("stole a card from")) return; 
+
+    // ... (Keep your existing text parsing for Pairs, Stop, Last Chance, etc.) ...
     let title = "";
     let sub = "";
     let Icon = CheckCircle;
@@ -886,24 +891,12 @@ export default function PaperOceans() {
 
     if (text.includes("played a pair")) {
       isImportant = true;
-      title = "TAKE TOP CARD!";
+      title = "ACTION PLAYED";
       sub = text;
       Icon = Sparkles;
-      if (text.includes("Shark")) {
-        title = "STEAL FROM OPPONENT!";
-        Icon = Sword;
-      } else if (text.includes("Crab")) {
-        title = "TAKE FROM DISCARD PILE!";
-        Icon = Scissors;
-      } else if (text.includes("Boat")) {
-        title = "TAKE ANOTHER TURN!";
-        Icon = Ship;
-      }
-    } else if (text.includes("Stole")) {
-      isImportant = true;
-      title = "THIEVERY!";
-      sub = text;
-      Icon = Sword;
+      if (text.includes("Shark")) Icon = Sword;
+      else if (text.includes("Crab")) Icon = Scissors;
+      else if (text.includes("Boat")) Icon = Ship;
     } else if (text.includes("STOP")) {
       isImportant = true;
       title = "ROUND STOPPED!";
@@ -914,26 +907,21 @@ export default function PaperOceans() {
       title = "LAST CHANCE!";
       sub = "All other players get 1 final turn.";
       Icon = AlertTriangle;
-    } else if (latestLog.type === "success" && text.includes("Bet")) {
-      isImportant = true;
-      title = "BET SUCCEEDED!";
-      sub = "The gamble paid off!";
-      Icon = Trophy;
-    } else if (latestLog.type === "failure" && text.includes("Bet")) {
-      isImportant = true;
-      title = "BET FAILED!";
-      sub = "The challenger fell short.";
-      Icon = AlertTriangle;
+    } else if (text.includes("Bet Succeeded")) {
+        isImportant = true;
+        title = "BET WON!";
+        sub = text;
+        Icon = Trophy;
+    } else if (text.includes("Bet Failed")) {
+        isImportant = true;
+        title = "BET LOST!";
+        sub = text;
+        Icon = AlertTriangle;
     } else if (text.includes("INSTANT WIN")) {
-      isImportant = true;
-      title = "INSTANT WIN!";
-      sub = "The Mermaids have chosen a winner!";
-      Icon = Crown;
-    } else if (text.includes("Round") && text.includes("Start")) {
-      isImportant = true;
-      title = "ANCHORS AWEIGH!";
-      sub = `Round ${gameState.round} Begin`;
-      Icon = Anchor;
+        isImportant = true;
+        title = "INSTANT WIN!";
+        sub = "4 Mermaids Found!";
+        Icon = Crown;
     }
 
     if (isImportant) {
@@ -941,10 +929,46 @@ export default function PaperOceans() {
     }
   }, [gameState?.logs]);
 
-  const triggerFeedback = (type, msg, sub, icon) => {
-    setFeedback({ type, message: msg, subtext: sub, icon });
-    setTimeout(() => setFeedback(null), 2500);
-  };
+  // 2. Handle Specific Feedback Triggers (The Shark Logic)
+  useEffect(() => {
+    if (!gameState?.feedbackTrigger) return;
+    
+    // We use the ID to ensure we don't re-trigger old alerts on refresh
+    // In a real app we might compare against a ref, but simple check helps:
+    const trigger = gameState.feedbackTrigger;
+    
+    // Check if this trigger happened extremely recently (within 3 seconds)
+    // to avoid re-showing it on page reload
+    if (Date.now() - trigger.id > 4000) return;
+
+    if (trigger.type === "STEAL") {
+        if (user.uid === trigger.actorId) {
+            // I AM THE STEALER
+            triggerFeedback(
+                "success", 
+                "YOU STOLE!", 
+                `You took the ${trigger.cardName} from ${trigger.targetName}`, 
+                Sword
+            );
+        } else if (user.uid === trigger.targetId) {
+            // I AM THE VICTIM
+            triggerFeedback(
+                "failure", 
+                "THIEVERY!", 
+                `${trigger.actorName} stole your ${trigger.cardName}!`, 
+                AlertTriangle
+            );
+        } else {
+            // I AM A BYSTANDER
+            triggerFeedback(
+                "neutral", 
+                "THEFT", 
+                `${trigger.actorName} stole a card from ${trigger.targetName}.`, 
+                Sword
+            );
+        }
+    }
+  }, [gameState?.feedbackTrigger, user?.uid]);
 
   // --- ACTIONS ---
 
@@ -977,6 +1001,7 @@ export default function PaperOceans() {
       winnerId: null,
       bettingPlayerId: null,
       tempDraw: [],
+      feedbackTrigger: null,
       round: 1,
     };
 
@@ -1164,6 +1189,7 @@ export default function PaperOceans() {
         winnerId: null,
         bettingPlayerId: null,
         tempDraw: [],
+        feedbackTrigger: null,
       }
     );
     setShowLeaveConfirm(false);
@@ -1399,23 +1425,41 @@ export default function PaperOceans() {
   const handleSharkSteal = async (targetId) => {
     const players = [...gameState.players];
     const meIdx = gameState.turnIndex;
+    const me = players[meIdx]; // Need reference to self for name
     const targetIdx = players.findIndex((p) => p.id === targetId);
+    const target = players[targetIdx];
 
     if (players[targetIdx].hand.length > 0) {
       const rand = Math.floor(Math.random() * players[targetIdx].hand.length);
-      const stolen = players[targetIdx].hand.splice(rand, 1)[0];
+      
+      // Capture the card object before splicing
+      const stolen = players[targetIdx].hand.splice(rand, 1)[0]; 
+      const cardName = CARD_TYPES[stolen.type].name; // Get the readable name
+
       players[meIdx].hand.push(stolen);
 
       setSharkStealMode(false);
+      
       await updateDoc(
         doc(db, "artifacts", APP_ID, "public", "data", "rooms", roomId),
         {
           players,
+          // 1. Generic Log for history (Public)
           logs: arrayUnion({
-            text: `Effect: Stole card from ${players[targetIdx].name}.`,
-            type: "failure",
+            text: `${me.name} stole a card from ${target.name}.`,
+            type: "neutral", 
             id: Date.now(),
           }),
+          // 2. Specific Trigger for UI Modals (Contains Private Data)
+          feedbackTrigger: {
+            id: Date.now(), // Unique ID to trigger useEffect
+            type: "STEAL",
+            actorId: me.id,
+            actorName: me.name,
+            targetId: target.id,
+            targetName: target.name,
+            cardName: cardName, // The secret info
+          }
         }
       );
     } else {
