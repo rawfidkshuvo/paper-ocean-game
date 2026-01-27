@@ -1115,6 +1115,11 @@ export default function PaperOceans() {
       score: continueGame ? p.score : 0,
     }));
 
+    // Calculate random start ONLY if it's a new game
+    const startIndex = continueGame 
+      ? (gameState.turnIndex + 1) % gameState.players.length
+      : Math.floor(Math.random() * gameState.players.length);
+
     await updateDoc(
       doc(db, "artifacts", APP_ID, "public", "data", "rooms", roomId),
       {
@@ -1498,7 +1503,7 @@ export default function PaperOceans() {
   };
 
   const handleStop = async () => {
-    const players = [...gameState.players];
+    const players = gameState.players.map(p => ({ ...p }));
     const me = players[gameState.turnIndex];
 
     players.forEach((p) => {
@@ -1543,7 +1548,7 @@ export default function PaperOceans() {
   };
 
   const resolveRound = async (currentPlayers) => {
-    const players = [...currentPlayers];
+    const players = currentPlayers.map(p => ({ ...p }));
     const bettorId = gameState.bettingPlayerId;
     const bettor = players.find((p) => p.id === bettorId);
 
