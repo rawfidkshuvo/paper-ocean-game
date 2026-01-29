@@ -66,7 +66,7 @@ const firebaseConfig = {
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -431,10 +431,10 @@ const FeedbackOverlay = ({ type, message, subtext, icon: Icon }) => (
         type === "success"
           ? "bg-emerald-900/90 border-emerald-500 text-emerald-100"
           : type === "failure"
-          ? "bg-red-900/90 border-red-500 text-red-100"
-          : type === "warning"
-          ? "bg-amber-900/90 border-amber-500 text-amber-100"
-          : "bg-blue-900/90 border-blue-500 text-blue-100"
+            ? "bg-red-900/90 border-red-500 text-red-100"
+            : type === "warning"
+              ? "bg-amber-900/90 border-amber-500 text-amber-100"
+              : "bg-blue-900/90 border-blue-500 text-blue-100"
       }
     `}
     >
@@ -504,8 +504,8 @@ const CardDisplay = ({
       onClick={!disabled ? onClick : undefined}
       className={`
         ${baseClasses} ${sizeClasses} ${card.bg} ${
-        highlight ? "ring-4 ring-yellow-400 z-10 scale-105" : card.border
-      }
+          highlight ? "ring-4 ring-yellow-400 z-10 scale-105" : card.border
+        }
         ${
           disabled
             ? "opacity-50 grayscale cursor-not-allowed"
@@ -518,10 +518,10 @@ const CardDisplay = ({
           {card.type === "DUO"
             ? "DUO"
             : card.type === "COLLECT"
-            ? "SET"
-            : card.type === "MULTIPLIER"
-            ? "MULT"
-            : "X"}
+              ? "SET"
+              : card.type === "MULTIPLIER"
+                ? "MULT"
+                : "X"}
         </span>
         {count > 1 && (
           <span className="bg-black/50 px-1 rounded text-white">x{count}</span>
@@ -736,6 +736,7 @@ export default function PaperOceans() {
   const [loading, setLoading] = useState(false);
 
   const [isMaintenance, setIsMaintenance] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   // UI States
   const [showLogs, setShowLogs] = useState(false);
@@ -814,7 +815,7 @@ export default function PaperOceans() {
       (err) => {
         console.error("Sync error:", err);
         setError("Connection lost.");
-      }
+      },
     );
     return () => unsub();
   }, [roomId, user]);
@@ -843,7 +844,7 @@ export default function PaperOceans() {
                 type: "success",
                 id: Date.now(),
               }),
-            }
+            },
           );
         }
       }
@@ -878,10 +879,10 @@ export default function PaperOceans() {
     lastLogIdRef.current = latestLog.id;
 
     const text = latestLog.text;
-    
-    // Skip the generic "stole a card" log here, because we handle it in the 
+
+    // Skip the generic "stole a card" log here, because we handle it in the
     // specific feedbackTrigger useEffect below for better detail.
-    if (text.includes("stole a card from")) return; 
+    if (text.includes("stole a card from")) return;
 
     // ... (Keep your existing text parsing for Pairs, Stop, Last Chance, etc.) ...
     let title = "";
@@ -908,20 +909,20 @@ export default function PaperOceans() {
       sub = "All other players get 1 final turn.";
       Icon = AlertTriangle;
     } else if (text.includes("Bet Succeeded")) {
-        isImportant = true;
-        title = "BET WON!";
-        sub = text;
-        Icon = Trophy;
+      isImportant = true;
+      title = "BET WON!";
+      sub = text;
+      Icon = Trophy;
     } else if (text.includes("Bet Failed")) {
-        isImportant = true;
-        title = "BET LOST!";
-        sub = text;
-        Icon = AlertTriangle;
+      isImportant = true;
+      title = "BET LOST!";
+      sub = text;
+      Icon = AlertTriangle;
     } else if (text.includes("INSTANT WIN")) {
-        isImportant = true;
-        title = "INSTANT WIN!";
-        sub = "4 Mermaids Found!";
-        Icon = Crown;
+      isImportant = true;
+      title = "INSTANT WIN!";
+      sub = "4 Mermaids Found!";
+      Icon = Crown;
     }
 
     if (isImportant) {
@@ -932,41 +933,41 @@ export default function PaperOceans() {
   // 2. Handle Specific Feedback Triggers (The Shark Logic)
   useEffect(() => {
     if (!gameState?.feedbackTrigger) return;
-    
+
     // We use the ID to ensure we don't re-trigger old alerts on refresh
     // In a real app we might compare against a ref, but simple check helps:
     const trigger = gameState.feedbackTrigger;
-    
+
     // Check if this trigger happened extremely recently (within 3 seconds)
     // to avoid re-showing it on page reload
     if (Date.now() - trigger.id > 4000) return;
 
     if (trigger.type === "STEAL") {
-        if (user.uid === trigger.actorId) {
-            // I AM THE STEALER
-            triggerFeedback(
-                "success", 
-                "YOU STOLE!", 
-                `You took the ${trigger.cardName} from ${trigger.targetName}`, 
-                Sword
-            );
-        } else if (user.uid === trigger.targetId) {
-            // I AM THE VICTIM
-            triggerFeedback(
-                "failure", 
-                "THIEVERY!", 
-                `${trigger.actorName} stole your ${trigger.cardName}!`, 
-                AlertTriangle
-            );
-        } else {
-            // I AM A BYSTANDER
-            triggerFeedback(
-                "neutral", 
-                "THEFT", 
-                `${trigger.actorName} stole a card from ${trigger.targetName}.`, 
-                Sword
-            );
-        }
+      if (user.uid === trigger.actorId) {
+        // I AM THE STEALER
+        triggerFeedback(
+          "success",
+          "YOU STOLE!",
+          `You took the ${trigger.cardName} from ${trigger.targetName}`,
+          Sword,
+        );
+      } else if (user.uid === trigger.targetId) {
+        // I AM THE VICTIM
+        triggerFeedback(
+          "failure",
+          "THIEVERY!",
+          `${trigger.actorName} stole your ${trigger.cardName}!`,
+          AlertTriangle,
+        );
+      } else {
+        // I AM A BYSTANDER
+        triggerFeedback(
+          "neutral",
+          "THEFT",
+          `${trigger.actorName} stole a card from ${trigger.targetName}.`,
+          Sword,
+        );
+      }
     }
   }, [gameState?.feedbackTrigger, user?.uid]);
 
@@ -1013,7 +1014,7 @@ export default function PaperOceans() {
     try {
       await setDoc(
         doc(db, "artifacts", APP_ID, "public", "data", "rooms", newId),
-        initialData
+        initialData,
       );
       localStorage.setItem("paperoceans_roomId", newId); // Save Session
       setRoomId(newId);
@@ -1089,7 +1090,7 @@ export default function PaperOceans() {
       players[myIdx].ready = !players[myIdx].ready;
       await updateDoc(
         doc(db, "artifacts", APP_ID, "public", "data", "rooms", roomId),
-        { players }
+        { players },
       );
     }
   };
@@ -1099,7 +1100,7 @@ export default function PaperOceans() {
     const players = gameState.players.filter((p) => p.id !== targetId);
     await updateDoc(
       doc(db, "artifacts", APP_ID, "public", "data", "rooms", roomId),
-      { players }
+      { players },
     );
   };
 
@@ -1116,7 +1117,7 @@ export default function PaperOceans() {
     }));
 
     // Calculate random start ONLY if it's a new game
-    const startIndex = continueGame 
+    const startIndex = continueGame
       ? (gameState.turnIndex + 1) % gameState.players.length
       : Math.floor(Math.random() * gameState.players.length);
 
@@ -1141,7 +1142,7 @@ export default function PaperOceans() {
         bettingPlayerId: null,
         tempDraw: [],
         round: continueGame ? increment(1) : 1,
-      }
+      },
     );
   };
 
@@ -1155,7 +1156,7 @@ export default function PaperOceans() {
         "public",
         "data",
         "rooms",
-        roomId
+        roomId,
       );
       if (gameState.hostId === user.uid) {
         await deleteDoc(ref);
@@ -1200,23 +1201,36 @@ export default function PaperOceans() {
         bettingPlayerId: null,
         tempDraw: [],
         feedbackTrigger: null,
-      }
+      },
     );
     setShowLeaveConfirm(false);
   };
 
   const copyToClipboard = () => {
+    const textToCopy = gameState.roomId;
+
+    // Logic to show the popup and hide it after 2 seconds
+    const handleSuccess = () => {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+
+      // Keep your existing global feedback if needed
+      if (triggerFeedback)
+        triggerFeedback("neutral", "COPIED!", "", CheckCircle);
+    };
+
     try {
-      navigator.clipboard.writeText(roomId);
-      triggerFeedback("neutral", "COPIED!", "", CheckCircle);
+      navigator.clipboard.writeText(textToCopy);
+      handleSuccess();
     } catch (e) {
+      // Fallback for older browsers
       const el = document.createElement("textarea");
-      el.value = roomId;
+      el.value = textToCopy;
       document.body.appendChild(el);
       el.select();
       document.execCommand("copy");
       document.body.removeChild(el);
-      triggerFeedback("neutral", "COPIED!", "", CheckCircle);
+      handleSuccess();
     }
   };
 
@@ -1247,7 +1261,7 @@ export default function PaperOceans() {
             type: "warning",
             id: Date.now(),
           }),
-        }
+        },
       );
       setTimeout(() => checkForGameWin(players, roomId), 3000);
       return;
@@ -1272,7 +1286,7 @@ export default function PaperOceans() {
               type: "neutral",
               id: Date.now(),
             }),
-          }
+          },
         );
         return;
       }
@@ -1291,7 +1305,7 @@ export default function PaperOceans() {
           type: "neutral",
           id: Date.now(),
         }),
-      }
+      },
     );
   };
 
@@ -1319,7 +1333,7 @@ export default function PaperOceans() {
           type: "neutral",
           id: Date.now(),
         }),
-      }
+      },
     );
   };
 
@@ -1344,7 +1358,7 @@ export default function PaperOceans() {
           type: "neutral",
           id: Date.now(),
         }),
-      }
+      },
     );
   };
 
@@ -1357,7 +1371,12 @@ export default function PaperOceans() {
     const card2 = me.hand[selectedHandIndices[1]];
 
     if (card1.type !== card2.type || CARD_TYPES[card1.type].type !== "DUO") {
-      triggerFeedback("failure", "INVALID DUO", "Must pick 2 matching Duo cards.", AlertTriangle);
+      triggerFeedback(
+        "failure",
+        "INVALID DUO",
+        "Must pick 2 matching Duo cards.",
+        AlertTriangle,
+      );
       setSelectedHandIndices([]);
       return;
     }
@@ -1376,7 +1395,9 @@ export default function PaperOceans() {
         setDiscardSearchMode(true); // Open the Modal
       }
     } else if (card1.type === "SHARK") {
-      const hasOpponentWithCards = players.some((p, i) => i !== pIdx && p.hand.length > 0);
+      const hasOpponentWithCards = players.some(
+        (p, i) => i !== pIdx && p.hand.length > 0,
+      );
       if (hasOpponentWithCards) {
         setSharkStealMode(true); // Show "STEAL" buttons on opponents
       }
@@ -1403,7 +1424,7 @@ export default function PaperOceans() {
           type: "success",
           id: Date.now(),
         }),
-      }
+      },
     );
   };
 
@@ -1428,7 +1449,7 @@ export default function PaperOceans() {
           type: "neutral",
           id: Date.now(),
         }),
-      }
+      },
     );
   };
 
@@ -1441,15 +1462,15 @@ export default function PaperOceans() {
 
     if (players[targetIdx].hand.length > 0) {
       const rand = Math.floor(Math.random() * players[targetIdx].hand.length);
-      
+
       // Capture the card object before splicing
-      const stolen = players[targetIdx].hand.splice(rand, 1)[0]; 
+      const stolen = players[targetIdx].hand.splice(rand, 1)[0];
       const cardName = CARD_TYPES[stolen.type].name; // Get the readable name
 
       players[meIdx].hand.push(stolen);
 
       setSharkStealMode(false);
-      
+
       await updateDoc(
         doc(db, "artifacts", APP_ID, "public", "data", "rooms", roomId),
         {
@@ -1457,7 +1478,7 @@ export default function PaperOceans() {
           // 1. Generic Log for history (Public)
           logs: arrayUnion({
             text: `${me.name} stole a card from ${target.name}.`,
-            type: "neutral", 
+            type: "neutral",
             id: Date.now(),
           }),
           // 2. Specific Trigger for UI Modals (Contains Private Data)
@@ -1469,8 +1490,8 @@ export default function PaperOceans() {
             targetId: target.id,
             targetName: target.name,
             cardName: cardName, // The secret info
-          }
-        }
+          },
+        },
       );
     } else {
       setSharkStealMode(false);
@@ -1498,12 +1519,12 @@ export default function PaperOceans() {
           type: "neutral",
           id: Date.now(),
         }),
-      }
+      },
     );
   };
 
   const handleStop = async () => {
-    const players = gameState.players.map(p => ({ ...p }));
+    const players = gameState.players.map((p) => ({ ...p }));
     const me = players[gameState.turnIndex];
 
     players.forEach((p) => {
@@ -1522,7 +1543,7 @@ export default function PaperOceans() {
           type: "success",
           id: Date.now(),
         }),
-      }
+      },
     );
     setTimeout(() => checkForGameWin(players, roomId), 3000);
   };
@@ -1543,12 +1564,12 @@ export default function PaperOceans() {
           type: "warning",
           id: Date.now(),
         }),
-      }
+      },
     );
   };
 
   const resolveRound = async (currentPlayers) => {
-    const players = currentPlayers.map(p => ({ ...p }));
+    const players = currentPlayers.map((p) => ({ ...p }));
     const bettorId = gameState.bettingPlayerId;
     const bettor = players.find((p) => p.id === bettorId);
 
@@ -1563,7 +1584,7 @@ export default function PaperOceans() {
       if (p.id !== bettorId) {
         // Opponent Normal Score (includes Mermaid Multiplier)
         const oppStrength = calculatePoints(p.hand, p.tableau, false);
-        
+
         // If opponent ties or exceeds bettor, bettor loses
         if (oppStrength >= bettorStrength) bettorWon = false;
       }
@@ -1622,7 +1643,7 @@ export default function PaperOceans() {
           type: bettorWon ? "success" : "failure",
           id: Date.now(),
         }),
-      }
+      },
     );
     setTimeout(() => checkForGameWin(players, roomId), 4000);
   };
@@ -1638,7 +1659,7 @@ export default function PaperOceans() {
         {
           status: "finished",
           winnerId: winner.id,
-        }
+        },
       );
     }
   };
@@ -1801,36 +1822,52 @@ export default function PaperOceans() {
         )}
 
         <div className="z-10 w-full max-w-lg bg-slate-900/90 backdrop-blur p-8 rounded-2xl border border-cyan-500/30 shadow-2xl animate-in slide-in-from-bottom-8">
-          <div className="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
-            <div className="flex flex-col">
-              <span className="text-xs text-cyan-500 uppercase font-bold tracking-wider">
+          <div className="flex justify-between items-center mb-8 border-b border-gray-700 pb-4">
+            {/* Grouping Title and Copy Button together on the left */}
+            <div>
+              <h2 className="text-lg md:text-xl text-cyan-500 font-bold uppercase">
                 Voyage Code
-              </span>
-              <div className="flex items-center gap-2">
-                <h2 className="text-4xl font-black text-white font-mono tracking-widest">
-                  {gameState.roomId}
-                </h2>
-                <button
-                  onClick={copyToClipboard}
-                  className="p-2 hover:bg-white/10 rounded-full transition-colors"
-                >
-                  <Copy size={16} />
-                </button>
+              </h2>
+
+              {/* Flex container to align ID and Button side-by-side */}
+              <div className="flex items-center gap-3 mt-1">
+                <div className="text-2xl md:text-3xl font-mono text-white font-black">
+                  {roomId}
+                </div>
+
+                {/* 2. Container set to relative for positioning the popup */}
+                <div className="relative">
+                  <button
+                    onClick={copyToClipboard}
+                    className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white"
+                  >
+                    {/* Optional: Change icon to checkmark when copied */}
+                    {isCopied ? (
+                      <CheckCircle size={16} className="text-green-500" />
+                    ) : (
+                      <Copy size={16} />
+                    )}
+                  </button>
+
+                  {/* 3. The Copied Popup */}
+                  {isCopied && (
+                    <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-green-500 text-black text-xs font-bold px-2 py-1 rounded shadow-lg animate-fade-in-up whitespace-nowrap">
+                      Copied!
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <User size={16} /> {gameState.players.length}/2
+              </div>
               <button
-                onClick={() => setShowGuide(true)}
-                className="p-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-cyan-400 transition-colors"
-                title="How to Play"
+                onClick={() => setShowLeaveConfirm(true)}
+                className="p-2 bg-red-900/50 hover:bg-red-900 rounded text-red-300"
+                title="Leave Room"
               >
-                <BookOpen size={20} />
-              </button>
-              <button
-                onClick={handleLeave}
-                className="p-3 bg-red-900/30 hover:bg-red-900/50 rounded-xl text-red-400 transition-colors"
-              >
-                <LogOut size={20} />
+                <LogOut size={16} />
               </button>
             </div>
           </div>
@@ -1875,7 +1912,7 @@ export default function PaperOceans() {
                 >
                   Empty Slot
                 </div>
-              )
+              ),
             )}
           </div>
 
@@ -2013,7 +2050,7 @@ export default function PaperOceans() {
                 <span className="text-white underline decoration-amber-500 underline-offset-4">
                   {
                     gameState.players.find(
-                      (p) => p.id === gameState.bettingPlayerId
+                      (p) => p.id === gameState.bettingPlayerId,
                     )?.name
                   }
                 </span>
@@ -2048,10 +2085,10 @@ export default function PaperOceans() {
                       log.type === "success"
                         ? "border-emerald-500 bg-emerald-900/10"
                         : log.type === "failure"
-                        ? "border-red-500 bg-red-900/10"
-                        : log.type === "warning"
-                        ? "border-amber-500 bg-amber-900/10"
-                        : "border-slate-500 bg-slate-800/30"
+                          ? "border-red-500 bg-red-900/10"
+                          : log.type === "warning"
+                            ? "border-amber-500 bg-amber-900/10"
+                            : "border-slate-500 bg-slate-800/30"
                     }`}
                   >
                     {log.text}
@@ -2254,7 +2291,8 @@ export default function PaperOceans() {
             <div className="absolute top-0 w-full text-center pointer-events-none p-2">
               {!isMyTurn && gameState.status === "playing" && (
                 <div className="inline-block bg-slate-900/80 px-4 py-1 rounded-full text-slate-400 text-sm border border-slate-700 backdrop-blur-sm">
-                  Waiting for {gameState.players[gameState.turnIndex]?.name || "Player"}...
+                  Waiting for{" "}
+                  {gameState.players[gameState.turnIndex]?.name || "Player"}...
                 </div>
               )}
             </div>
@@ -2388,7 +2426,7 @@ export default function PaperOceans() {
 
                           if (selectedHandIndices.includes(i)) {
                             setSelectedHandIndices(
-                              selectedHandIndices.filter((idx) => idx !== i)
+                              selectedHandIndices.filter((idx) => idx !== i),
                             );
                           } else if (selectedHandIndices.length < 2) {
                             setSelectedHandIndices([...selectedHandIndices, i]);
@@ -2416,20 +2454,23 @@ export default function PaperOceans() {
             <div className="bg-slate-900 border-2 border-red-500/50 rounded-3xl w-full max-w-2xl p-6 shadow-[0_0_50px_rgba(239,68,68,0.2)]">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-black text-white flex items-center gap-3">
-                  <Scissors className="text-red-400 animate-pulse" /> 
+                  <Scissors className="text-red-400 animate-pulse" />
                   SALVAGE DISCARD
                 </h3>
-                <button 
+                <button
                   onClick={() => setDiscardSearchMode(false)}
                   className="p-2 hover:bg-slate-800 rounded-full text-slate-400"
                 >
                   <X size={24} />
                 </button>
               </div>
-              
+
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 max-h-[50vh] overflow-y-auto p-4 bg-black/40 rounded-2xl mb-6 custom-scrollbar">
                 {gameState.discardPile.map((c, i) => (
-                  <div key={`${c.id}-${i}`} className="flex flex-col items-center gap-2">
+                  <div
+                    key={`${c.id}-${i}`}
+                    className="flex flex-col items-center gap-2"
+                  >
                     <CardDisplay
                       cardType={c.type}
                       onClick={() => handleCrabPick(c)}
@@ -2438,7 +2479,7 @@ export default function PaperOceans() {
                   </div>
                 ))}
               </div>
-              
+
               <p className="text-center text-slate-400 text-sm font-bold animate-pulse">
                 Select 1 card to add to your hand
               </p>
@@ -2490,7 +2531,8 @@ export default function PaperOceans() {
                             const def = CARD_TYPES[c.type];
                             const color = def ? def.cardColor : null;
                             if (color && color !== "MULTI") {
-                              colorCounts[color] = (colorCounts[color] || 0) + 1;
+                              colorCounts[color] =
+                                (colorCounts[color] || 0) + 1;
                             }
                           });
                           return Math.max(0, ...Object.values(colorCounts));
@@ -2502,16 +2544,27 @@ export default function PaperOceans() {
                         }
 
                         // 2. Last Chance Scoring Display
-                        const bettor = allPlayers.find((pl) => pl.id === bettingId);
-                        
+                        const bettor = allPlayers.find(
+                          (pl) => pl.id === bettingId,
+                        );
+
                         // Calculate Strengths (Normal Scores with Mermaid Mult)
-                        const bettorStrength = calculatePoints(bettor.hand, bettor.tableau, false);
-                        
+                        const bettorStrength = calculatePoints(
+                          bettor.hand,
+                          bettor.tableau,
+                          false,
+                        );
+
                         let bettorWon = true;
                         allPlayers.forEach((opp) => {
                           if (opp.id !== bettingId) {
-                            const oppStrength = calculatePoints(opp.hand, opp.tableau, false);
-                            if (oppStrength >= bettorStrength) bettorWon = false;
+                            const oppStrength = calculatePoints(
+                              opp.hand,
+                              opp.tableau,
+                              false,
+                            );
+                            if (oppStrength >= bettorStrength)
+                              bettorWon = false;
                           }
                         });
 
@@ -2637,8 +2690,8 @@ export default function PaperOceans() {
                       {!gameState.players.every((p) => p.ready)
                         ? "WAITING FOR READY..."
                         : gameState.status === "finished"
-                        ? "NEW GAME"
-                        : "NEXT ROUND"}
+                          ? "NEW GAME"
+                          : "NEXT ROUND"}
                       <Play fill="currentColor" size={20} />
                     </button>
                     <button
