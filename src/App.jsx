@@ -983,7 +983,11 @@ export default function PaperOceans() {
     localStorage.setItem("gameHub_playerName", playerName);
     setLoading(true);
 
-    const newId = Math.random().toString(36).substring(2, 7).toUpperCase();
+    const chars = "123456789ABCDEFGHIJKLMNPQRSTUVWXYZ";
+    let newId = "";
+    for (let i = 0; i < 6; i++) {
+      newId += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
 
     const initialData = {
       roomId: newId,
@@ -1863,7 +1867,7 @@ export default function PaperOceans() {
                 <User size={16} /> {gameState.players.length}/2
               </div>
               <button
-                onClick={() => setShowLeaveConfirm(true)}
+                onClick={handleLeave}
                 className="p-2 bg-red-900/50 hover:bg-red-900 rounded text-red-300"
                 title="Leave Room"
               >
