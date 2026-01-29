@@ -1747,7 +1747,7 @@ export default function PaperOceans() {
                   placeholder="CODE"
                   value={roomCode}
                   onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                  maxLength={5}
+                  maxLength={6}
                 />
                 <button
                   onClick={joinRoom}
