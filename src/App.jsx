@@ -1891,7 +1891,7 @@ export default function PaperOceans() {
                 <User size={16} /> {gameState.players.length}/2
               </div>
               <button
-                onClick={handleLeave}
+                onClick={() => setShowLeaveConfirm(true)} // This triggers the modal
                 className="p-2 bg-red-900/50 hover:bg-red-900 rounded text-red-300"
                 title="Leave Room"
               >
@@ -1964,6 +1964,37 @@ export default function PaperOceans() {
             </div>
           )}
         </div>
+        {/* Add this inside the Lobby return block, just before the final <GameLogo /> */}
+        {showLeaveConfirm && (
+          <div className="fixed inset-0 bg-black/90 z-200 flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-slate-700 p-6 rounded-xl max-w-xs w-full text-center shadow-2xl">
+              <h3 className="text-xl font-bold text-white mb-2 uppercase tracking-wider">
+                Abandon Ship?
+              </h3>
+              <p className="text-slate-400 mb-6 text-sm">
+                {isHost
+                  ? "As Captain, leaving will disband the entire fleet (delete room)."
+                  : "You will leave this voyage and return to the menu."}
+              </p>
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowLeaveConfirm(false)}
+                    className="flex-1 bg-slate-800 py-3 rounded-lg font-bold text-slate-300 hover:bg-slate-700 transition-colors"
+                  >
+                    Stay
+                  </button>
+                  <button
+                    onClick={handleLeave}
+                    className="flex-1 bg-red-600 py-3 rounded-lg font-bold text-white hover:bg-red-500 transition-colors"
+                  >
+                    Leave
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         <GameLogo />
       </div>
     );
