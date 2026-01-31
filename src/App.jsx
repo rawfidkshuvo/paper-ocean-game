@@ -52,7 +52,8 @@ import {
   Hammer,
   Bird, // Generic fallback
   Compass,
-  ShipWheel, // Captain fallback if needed
+  ShipWheel, // Captain
+  Magnet, // Horseshoe Crab
   Loader,
 } from "lucide-react";
 
@@ -60,7 +61,6 @@ import {
 // CONFIGURATION
 // ---------------------------------------------------------------------------
 
-// Uses environment variables for Firebase Config in Canvas
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -76,11 +76,10 @@ const APP_ID = typeof __app_id !== "undefined" ? __app_id : "paper-oceans-game";
 
 const STOP_THRESHOLD = 7;
 
-// Dynamic Winning Points based on player count
 const GET_WIN_THRESHOLD = (playerCount) => {
   if (playerCount === 4) return 30;
   if (playerCount === 3) return 35;
-  return 40; // Default/2 players
+  return 40; 
 };
 
 const CARD_TYPES = {
@@ -121,7 +120,7 @@ const CARD_TYPES = {
     bg: "bg-emerald-950",
     border: "border-emerald-700",
     desc: "Pair: Draw the top card of the deck.",
-    count: 7,
+    count: 5,
     cardColor: "GREEN",
   },
   SHARK: {
@@ -134,7 +133,7 @@ const CARD_TYPES = {
     bg: "bg-slate-800",
     border: "border-slate-600",
     desc: "Pair: Steal a random card from an opponent.",
-    count: 5,
+    count: 4,
     cardColor: "BLACK",
   },
 
@@ -148,7 +147,7 @@ const CARD_TYPES = {
     color: "text-amber-200",
     bg: "bg-amber-950",
     border: "border-amber-700",
-    desc: "Set: 2pts per shell.",
+    desc: "Set: 0 for 1st, 2pts for each additional.",
     count: 6,
     cardColor: "YELLOW",
   },
@@ -161,7 +160,7 @@ const CARD_TYPES = {
     color: "text-purple-400",
     bg: "bg-purple-950",
     border: "border-purple-700",
-    desc: "Set: 3pts per octopus.",
+    desc: "Set: 0 for 1st, 3pts for each additional.",
     count: 5,
     cardColor: "PURPLE",
   },
@@ -170,7 +169,7 @@ const CARD_TYPES = {
     name: "Ice Penguin",
     type: "COLLECT",
     points: 0,
-    icon: Bird, // Using Cloud/User to distinguish from Snowman
+    icon: Bird, 
     color: "text-cyan-200",
     bg: "bg-cyan-950",
     border: "border-cyan-700",
@@ -202,7 +201,7 @@ const CARD_TYPES = {
     color: "text-fuchsia-400",
     bg: "bg-fuchsia-950",
     border: "border-fuchsia-700",
-    desc: "+1 Point for each card of your most common color.",
+    desc: "Scores your 1st, 2nd, 3rd highest color groups respectively.",
     count: 4,
     cardColor: "MULTI",
   },
@@ -217,7 +216,7 @@ const CARD_TYPES = {
     border: "border-blue-500",
     desc: "+1 Point for each Boat.",
     count: 1,
-    cardColor: "BLUE", // Assuming Lighthouse is Blue-ish
+    cardColor: "BLUE",
   },
   SHOAL: {
     id: "SHOAL",
@@ -258,6 +257,20 @@ const CARD_TYPES = {
     count: 1,
     cardColor: "ORANGE",
   },
+  // NEW CARD
+  HORSESHOE_CRAB: {
+    id: "HORSESHOE_CRAB",
+    name: "Horseshoe Crab",
+    type: "MULTIPLIER",
+    points: 0,
+    icon: Magnet, // Visual approximation
+    color: "text-red-300",
+    bg: "bg-red-900",
+    border: "border-red-500",
+    desc: "+1 Point for each Crab.",
+    count: 1,
+    cardColor: "RED",
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -289,17 +302,18 @@ const calculatePoints = (hand, tableau, isLastChance = false) => {
   // 1. Duos (Score for every pair in Hand + Tableau)
   const duoTypes = ["CRAB", "BOAT", "FISH", "SHARK"];
   duoTypes.forEach((type) => {
-    // Count ALL cards of this type (played + hand)
     const count = allCards.filter((c) => c.type === type).length;
     score += Math.floor(count / 2);
   });
 
   // 2. Collectors
   const shells = allCards.filter((c) => c.type === "SHELL").length;
-  if (shells > 0) score += shells * 2;
+  // UPDATE: Points from 2nd card (1st is 0, subsequent are 2pts)
+  if (shells > 1) score += (shells - 1) * 2;
 
   const octopuses = allCards.filter((c) => c.type === "OCTOPUS").length;
-  score += octopuses * 3;
+  // UPDATE: Points from 2nd card (1st is 0, subsequent are 3pts)
+  if (octopuses > 1) score += (octopuses - 1) * 3;
 
   const penguins = allCards.filter((c) => c.type === "PENGUIN").length;
   if (penguins === 1) score += 1;
@@ -331,11 +345,18 @@ const calculatePoints = (hand, tableau, isLastChance = false) => {
   if (hasCaptain) {
     score += sailors * 3;
   }
+  
+  // NEW: Horseshoe Crab Logic
+  const hasHorseshoe = allCards.some((c) => c.type === "HORSESHOE_CRAB");
+  if (hasHorseshoe) {
+    const crabs = allCards.filter((c) => c.type === "CRAB").length;
+    score += crabs;
+  }
 
   // 4. Mermaids & Color Bonus
   const mermaids = allCards.filter((c) => c.type === "MERMAID").length;
 
-  // Calculate max color frequency
+  // Calculate color frequencies
   const colorCounts = {};
   allCards.forEach((c) => {
     const def = CARD_TYPES[c.type];
@@ -344,13 +365,20 @@ const calculatePoints = (hand, tableau, isLastChance = false) => {
       colorCounts[color] = (colorCounts[color] || 0) + 1;
     }
   });
-  const maxColorCount = Math.max(0, ...Object.values(colorCounts));
+  
+  // UPDATE: Sort values descending [5, 3, 2, 0...]
+  const sortedCounts = Object.values(colorCounts).sort((a, b) => b - a);
+  const maxColorCount = sortedCounts.length > 0 ? sortedCounts[0] : 0;
 
   if (mermaids > 0) {
-    // Standard rule: 1 pt per color per mermaid
-    score += mermaids * maxColorCount;
+    // NEW LOGIC: Mermaids score 1st highest, 2nd highest, etc.
+    for(let i=0; i<mermaids; i++) {
+      if (sortedCounts[i]) {
+        score += sortedCounts[i];
+      }
+    }
   } else if (isLastChance) {
-    // Relaxed rule: If no mermaid, but it's Last Chance, get flat color bonus
+    // Standard rule: If no mermaid, but it's Last Chance, get flat color bonus
     score += maxColorCount;
   }
 
@@ -2093,7 +2121,7 @@ export default function PaperOceans() {
           </div>
         </div>
 
-        {/* NEW: PERSISTENT LAST CHANCE BANNER                 */}
+        {/* NEW: PERSISTENT LAST CHANCE BANNER                  */}
         {/* -------------------------------------------------- */}
         {gameState.status === "last_chance" && (
           <div className="w-full bg-linear-to-r from-amber-900/90 via-orange-900/90 to-amber-900/90 border-b-4 border-amber-500 p-2 z-155 shrink-0 shadow-xl flex flex-col items-center justify-center animate-in slide-in-from-top-4 duration-500">
