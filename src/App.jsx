@@ -54,6 +54,7 @@ import {
   Compass,
   ShipWheel, // Captain
   Magnet, // Horseshoe Crab
+  ChessKnight,
   Loader,
 } from "lucide-react";
 
@@ -260,10 +261,10 @@ const CARD_TYPES = {
   // NEW CARD
   HORSESHOE_CRAB: {
     id: "HORSESHOE_CRAB",
-    name: "Horseshoe Crab",
+    name: "Horse Crab",
     type: "MULTIPLIER",
     points: 0,
-    icon: Magnet, // Visual approximation
+    icon: ChessKnight, // Visual approximation
     color: "text-red-300",
     bg: "bg-red-900",
     border: "border-red-500",
@@ -1277,15 +1278,20 @@ export default function PaperOceans() {
     // --- SAFETY CHECK 1: DECK EXHAUSTION ---
     // If we don't have enough cards in Deck + Discard to draw 2
     if (deck.length + discard.length < 2) {
-      // >>>>> FIX START: Give the last card (if it exists) to the player <<<<<
+      // ---------------------------------------------------------
+      // START CHANGE: Check BOTH Deck and Discard for a final card
+      // ---------------------------------------------------------
       if (deck.length > 0) {
-        const lastCard = deck.pop();
-        players[gameState.turnIndex].hand.push(lastCard);
-
-        // Optional: Add a log so players know what happened
-        // You'll need to add this to the logs array below if you want it visible
+        // Case A: 1 card left in Deck
+        players[gameState.turnIndex].hand.push(deck.pop());
+      } else if (discard.length > 0) {
+        // Case B: 0 in Deck, 1 in Discard (The loophole you found)
+        players[gameState.turnIndex].hand.push(discard.pop());
       }
-      // >>>>> FIX END <<<<<
+      // ---------------------------------------------------------
+      // END CHANGE
+      // ---------------------------------------------------------
+
       // Calculate scores as if everyone did a Safe Stop (Normal Score)
       players.forEach((p) => {
         const pts = calculatePoints(p.hand, p.tableau);
@@ -1299,6 +1305,7 @@ export default function PaperOceans() {
           status: "round_end",
           players,
           deck: deck, // Update the deck in DB (now empty)
+          discardPile: discard, // Update discard too (in case we pulled from it)
           logs: arrayUnion({
             text: "🌊 The Ocean is empty! Round ends immediately.",
             type: "warning",
