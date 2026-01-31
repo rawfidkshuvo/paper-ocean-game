@@ -79,7 +79,7 @@ const STOP_THRESHOLD = 7;
 const GET_WIN_THRESHOLD = (playerCount) => {
   if (playerCount === 4) return 30;
   if (playerCount === 3) return 35;
-  return 40; 
+  return 40;
 };
 
 const CARD_TYPES = {
@@ -169,7 +169,7 @@ const CARD_TYPES = {
     name: "Ice Penguin",
     type: "COLLECT",
     points: 0,
-    icon: Bird, 
+    icon: Bird,
     color: "text-cyan-200",
     bg: "bg-cyan-950",
     border: "border-cyan-700",
@@ -345,7 +345,7 @@ const calculatePoints = (hand, tableau, isLastChance = false) => {
   if (hasCaptain) {
     score += sailors * 3;
   }
-  
+
   // NEW: Horseshoe Crab Logic
   const hasHorseshoe = allCards.some((c) => c.type === "HORSESHOE_CRAB");
   if (hasHorseshoe) {
@@ -365,14 +365,14 @@ const calculatePoints = (hand, tableau, isLastChance = false) => {
       colorCounts[color] = (colorCounts[color] || 0) + 1;
     }
   });
-  
+
   // UPDATE: Sort values descending [5, 3, 2, 0...]
   const sortedCounts = Object.values(colorCounts).sort((a, b) => b - a);
   const maxColorCount = sortedCounts.length > 0 ? sortedCounts[0] : 0;
 
   if (mermaids > 0) {
     // NEW LOGIC: Mermaids score 1st highest, 2nd highest, etc.
-    for(let i=0; i<mermaids; i++) {
+    for (let i = 0; i < mermaids; i++) {
       if (sortedCounts[i]) {
         score += sortedCounts[i];
       }
@@ -1403,6 +1403,9 @@ export default function PaperOceans() {
     const card1 = me.hand[selectedHandIndices[0]];
     const card2 = me.hand[selectedHandIndices[1]];
 
+    // Capture the deck state here to ensure modifications persist in updateDoc
+    let deck = [...gameState.deck];
+
     if (card1.type !== card2.type || CARD_TYPES[card1.type].type !== "DUO") {
       triggerFeedback(
         "failure",
@@ -1437,7 +1440,7 @@ export default function PaperOceans() {
     } else if (card1.type === "BOAT") {
       nextState = "DRAW"; // Grant extra turn
     } else if (card1.type === "FISH") {
-      const deck = [...gameState.deck];
+      // Use the local deck variable which is passed to updateDoc
       if (deck.length > 0) {
         me.hand.push(deck.pop());
       }
@@ -1451,7 +1454,7 @@ export default function PaperOceans() {
       {
         players,
         turnState: nextState,
-        deck: gameState.deck,
+        deck: deck, // Correctly updated deck
         logs: arrayUnion({
           text: logText,
           type: "success",
