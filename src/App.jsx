@@ -1277,6 +1277,15 @@ export default function PaperOceans() {
     // --- SAFETY CHECK 1: DECK EXHAUSTION ---
     // If we don't have enough cards in Deck + Discard to draw 2
     if (deck.length + discard.length < 2) {
+      // >>>>> FIX START: Give the last card (if it exists) to the player <<<<<
+      if (deck.length > 0) {
+        const lastCard = deck.pop();
+        players[gameState.turnIndex].hand.push(lastCard);
+
+        // Optional: Add a log so players know what happened
+        // You'll need to add this to the logs array below if you want it visible
+      }
+      // >>>>> FIX END <<<<<
       // Calculate scores as if everyone did a Safe Stop (Normal Score)
       players.forEach((p) => {
         const pts = calculatePoints(p.hand, p.tableau);
@@ -1289,6 +1298,7 @@ export default function PaperOceans() {
         {
           status: "round_end",
           players,
+          deck: deck, // Update the deck in DB (now empty)
           logs: arrayUnion({
             text: "🌊 The Ocean is empty! Round ends immediately.",
             type: "warning",
