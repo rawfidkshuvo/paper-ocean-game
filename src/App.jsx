@@ -56,6 +56,7 @@ import {
   Magnet, // Horseshoe Crab
   ChessKnight,
   Loader,
+  Coins,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -2112,6 +2113,9 @@ export default function PaperOceans() {
                 ROUND {gameState.round}
               </span>
             </div>
+            <span className="bg-cyan-900/40 text-yellow-500 text-xs px-3 py-1 rounded-full border border-cyan-800/50 font-mono tracking-wider shadow-[0_0_10px_rgba(34,211,238,0.25)]">
+              Goal:{GET_WIN_THRESHOLD(gameState.players.length)}
+            </span>
           </div>
 
           <div className="flex gap-2">
