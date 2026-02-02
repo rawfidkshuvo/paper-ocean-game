@@ -75,7 +75,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const APP_ID = typeof __app_id !== "undefined" ? __app_id : "paper-oceans-game";
-
+const GAME_ID = "18";
 const STOP_THRESHOLD = 7;
 
 const GET_WIN_THRESHOLD = (playerCount) => {
@@ -850,6 +850,17 @@ export default function PaperOceans() {
     );
     return () => unsub();
   }, [roomId, user]);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "game_hub_settings", "config"), (doc) => {
+      if (doc.exists() && doc.data()[GAME_ID]?.maintenance) {
+        setIsMaintenance(true);
+      } else {
+        setIsMaintenance(false);
+      }
+    });
+    return () => unsub();
+  }, []);
 
   // --- INSTANT WIN CHECK (4 MERMAIDS) ---
   useEffect(() => {
@@ -1721,6 +1732,7 @@ export default function PaperOceans() {
   if (isMaintenance) {
     return (
       <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center text-white p-4 text-center">
+        <GameLogoBig />
         <div className="bg-orange-500/10 p-8 rounded-2xl border border-orange-500/30">
           <Hammer
             size={64}
@@ -1731,6 +1743,18 @@ export default function PaperOceans() {
             Tide is low. Folding operations paused.
           </p>
         </div>
+        <div className="h-8"></div>
+        <a href="https://rawfidkshuvo.github.io/gamehub/">
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <div className="text-center pb-12 animate-pulse">
+              <div className="inline-flex items-center gap-3 px-8 py-4 bg-slate-900/50 rounded-full border border-indigo-500/20 text-indigo-300 font-bold tracking-widest text-sm uppercase backdrop-blur-sm">
+                <Sparkles size={16} /> Visit Gamehub...Try our other releases...{" "}
+                <Sparkles size={16} />
+              </div>
+            </div>
+          </div>
+        </a>
+        <GameLogo />
       </div>
     );
   }
