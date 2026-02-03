@@ -2294,7 +2294,7 @@ export default function PaperOceans() {
                     </div>
 
                     {/* Bottom Row: Tableau (Played Cards) */}
-                    <div className="flex flex-wrap gap-1 mt-1">
+                    <div className="flex flex-wrap gap-0.5 min-h-[16px]">
                       {p.tableau.map((c, idx) => (
                         <CardDisplay key={idx} cardType={c.type} tiny />
                       ))}
