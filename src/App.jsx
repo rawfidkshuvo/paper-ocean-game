@@ -2235,9 +2235,10 @@ export default function PaperOceans() {
 
         {/* MAIN AREA */}
         <div className="flex-1 flex flex-col relative z-10 overflow-hidden h-full">
-          {/* 1. OPPONENTS AREA (Restricted to max 33% height, scrollable) */}
-          <div className="flex-none max-h-[35vh] overflow-visible p-2 border-b border-white/5 bg-slate-900/20">
-            <div className="grid grid-cols-3 gap-2 items-start">
+          {/* 1. OPPONENTS AREA */}
+          <div className="flex-none max-h-[35vh] overflow-x-auto p-2 border-b border-white/5 bg-slate-900/20">
+            {/* Changed flex-wrap to flex-nowrap to force a single row */}
+            <div className="flex flex-nowrap gap-2 items-start w-full">
               {gameState.players.map((p, i) => {
                 if (p.id === user.uid) return null;
                 const isActive = gameState.turnIndex === i;
@@ -2245,7 +2246,7 @@ export default function PaperOceans() {
                 return (
                   <div
                     key={p.id}
-                    className={`relative p-2 rounded-xl transition-all duration-500 flex flex-col gap-2 ${
+                    className={`relative p-2 rounded-xl transition-all duration-500 flex flex-col gap-2 flex-1 basis-0 min-w-0 ${
                       isActive
                         ? "bg-slate-800 border-2 border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)] z-10"
                         : "bg-slate-900/50 border border-slate-800 opacity-80"
