@@ -146,9 +146,9 @@ const CARD_TYPES = {
     type: "COLLECT",
     points: 0,
     icon: Shell,
-    color: "text-amber-200",
-    bg: "bg-amber-950",
-    border: "border-amber-700",
+    color: "text-yellow-200",
+    bg: "bg-yellow-950",
+    border: "border-yellow-700",
     desc: "Set: 0 for 1st, 2pts for each additional.",
     count: 6,
     cardColor: "YELLOW",
@@ -363,7 +363,7 @@ const calculatePoints = (hand, tableau, isLastChance = false) => {
   allCards.forEach((c) => {
     const def = CARD_TYPES[c.type];
     const color = def ? def.cardColor : null;
-    if (color && color !== "MULTI") {
+    if (color) {
       colorCounts[color] = (colorCounts[color] || 0) + 1;
     }
   });
@@ -939,11 +939,12 @@ export default function PaperOceans() {
       Icon = Sparkles;
       if (text.includes("Shark")) Icon = Sword;
       else if (text.includes("Crab")) Icon = Scissors;
-      else if (text.includes("Boat")) Icon = Ship;
+      else if (text.includes("Boat")) Icon = Sailboat;
+      else if (text.includes("Fish")) Icon = Fish;
     } else if (text.includes("STOP")) {
       isImportant = true;
       title = "ROUND STOPPED!";
-      sub = text.split("! ")[0] + " called STOP!";
+      sub = text;
       Icon = Hand;
     } else if (text.includes("LAST CHANCE")) {
       isImportant = true;
@@ -1663,8 +1664,7 @@ export default function PaperOceans() {
       all.forEach((c) => {
         const def = CARD_TYPES[c.type];
         const color = def ? def.cardColor : null;
-        if (color && color !== "MULTI")
-          colorCounts[color] = (colorCounts[color] || 0) + 1;
+        if (color) colorCounts[color] = (colorCounts[color] || 0) + 1;
       });
       return Math.max(0, ...Object.values(colorCounts));
     };
@@ -2666,7 +2666,7 @@ export default function PaperOceans() {
                           all.forEach((c) => {
                             const def = CARD_TYPES[c.type];
                             const color = def ? def.cardColor : null;
-                            if (color && color !== "MULTI") {
+                            if (color) {
                               colorCounts[color] =
                                 (colorCounts[color] || 0) + 1;
                             }
